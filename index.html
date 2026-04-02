@@ -892,93 +892,61 @@
 </div>
 
 <script>
-  // ── Local storage leads ──
-  const LEADS_KEY = 'propages_leads_v1';
+  const SUPABASE_URL = 'https://obizylsmrgltanvdrifa.supabase.co' ;
+const SUPABASE_KEY = 'sb_publishable_qE6vn0CGywisFBvYDxGn2g_jeLRtXKf' ;
 
-  function getLeads() {
-    try { return JSON.parse(localStorage.getItem(LEADS_KEY)) || []; }
-    catch { return []; }
+async function saveLead(lead) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`
+    },
+    body: JSON.stringify(lead)
+  });
+  return response.ok;
+}
+
+function selectOption(el) {
+  el.closest('.q-options').querySelectorAll('.q-option')
+    .forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function submitLead() {
+  const name  = document.getElementById('lead-name').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  const ownerEl = document.querySelector('.q-option.selected');
+  const owner_response = ownerEl ? ownerEl.textContent : null;
+
+  if (!name || !phone) {
+    document.getElementById('lead-name').style.borderColor  = !name  ? 'var(--danger)' : '';
+    document.getElementById('lead-phone').style.borderColor = !phone ? 'var(--danger)' : '';
+    return;
   }
 
-  function saveLeads(leads) {
-    localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
-  }
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
 
-  function updateBadge() {
-    const count = getLeads().length;
-    document.getElementById('leads-badge').textContent = count;
-  }
+  const success = await saveLead({ name, phone, owner_response });
 
-  function renderLeads() {
-    const leads = getLeads();
-    const list  = document.getElementById('leads-list');
-    if (!leads.length) {
-      list.innerHTML = '<div class="no-leads">No leads yet. Share your page to get started.</div>';
-      return;
-    }
-    list.innerHTML = leads.slice().reverse().map(l => `
-      <div class="lead-item">
-        <div class="lead-item-avatar">${l.name.charAt(0).toUpperCase()}</div>
-        <div>
-          <div class="lead-item-name">${escHtml(l.name)}</div>
-          <div class="lead-item-phone">${escHtml(l.phone)}</div>
-          ${l.owner ? `<div class="lead-item-owner">${escHtml(l.owner)}</div>` : ''}
-        </div>
-        <div class="lead-item-time">${escHtml(l.time)}</div>
-      </div>
-    `).join('');
-  }
-
-  function escHtml(str) {
-    return String(str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── Qualifying option toggle ──
-  function selectOption(el) {
-    el.closest('.q-options').querySelectorAll('.q-option')
-      .forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-
-  // ── Submit lead ──
-  function submitLead() {
-    const name  = document.getElementById('lead-name').value.trim();
-    const phone = document.getElementById('lead-phone').value.trim();
-    const ownerEl = document.querySelector('.q-option.selected');
-    const owner = ownerEl ? ownerEl.textContent : null;
-
-    if (!name || !phone) {
-      document.getElementById('lead-name').style.borderColor  = !name  ? 'var(--danger)' : '';
-      document.getElementById('lead-phone').style.borderColor = !phone ? 'var(--danger)' : '';
-      return;
-    }
-
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const leads = getLeads();
-    leads.push({ name, phone, owner, time, date: now.toISOString() });
-    saveLeads(leads);
-    updateBadge();
-
-    // Show success
+  if (success) {
     document.getElementById('lead-form').style.display = 'none';
     document.getElementById('success-state').style.display = 'block';
+  } else {
+    btn.textContent = 'Something went wrong — try again';
+    btn.disabled = false;
   }
+}
 
-  // ── Leads panel ──
-  function toggleLeads() {
-    const panel   = document.getElementById('leads-panel');
-    const overlay = document.getElementById('overlay');
-    const open    = panel.classList.toggle('open');
-    overlay.classList.toggle('open', open);
-    if (open) renderLeads();
-  }
-
-  // ── Init ──
-  updateBadge();
+function toggleLeads() {
+  const panel   = document.getElementById('leads-panel');
+  const overlay = document.getElementById('overlay');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
 </script>
 </body>
 </html>
