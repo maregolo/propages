@@ -173,6 +173,11 @@ function LeadForm({ repId, repName }) {
 export async function getServerSideProps({ params }) {
   const slug = params.slug;
 
+  const reserved = ['signup', 'setup', 'envtest', 'api'];
+  if (reserved.includes(slug)) {
+    return { notFound: true };
+  }
+
   const { data, error } = await supabase
     .from('reps')
     .select('*')
