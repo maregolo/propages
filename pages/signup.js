@@ -22,36 +22,35 @@ console.log('ENV:', process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 
     
-// Check if email is in invite_requests with status 'approved'
-    const { data } = await supabase
-      .from('invite_requests')
-      .select('status')
-      .eq('email', email.trim().toLowerCase())
-      .single();
+const { data, error: lookupError } = await supabase
+  .from('invite_requests')
+  .select('status')
+  .eq('email', email.trim().toLowerCase())
+  .eq('status', 'approved')
+  .limit(1)
+  .maybeSingle();
 
-    if (!data || data.status !== 'approved') {
-      setError("We don't have an approved invite for that email. Request access from the homepage.");
-      setLoading(false);
-      return;
-    }
+if (lookupError || !data) {
+  setError("We don't have an approved invite for that email. Request access from the homepage.");
+  setLoading(false);
+  return;
+}
 
-    // Send magic link
-    const { error } = await supabase.auth.signInWithOtp({
-  email,
+const { error: authError } = await supabase.auth.signInWithOtp({
+  email: email.trim().toLowerCase(),
   options: {
     emailRedirectTo: 'https://propages.vercel.app/setup',
   },
 });
 
-    if (authError) {
-      setError('Something went wrong. Please try again.');
-      setLoading(false);
-      return;
-    }
+if (authError) {
+  setError('Something went wrong. Please try again.');
+  setLoading(false);
+  return;
+}
 
-    setSent(true);
-    setLoading(false);
-  }
+setSent(true);
+setLoading(false);
 
   return (
     <>
