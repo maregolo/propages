@@ -400,6 +400,7 @@ export default function RepPage({ rep }) {
 
 function BlockPage({ rep }) {
   const [isOwner,         setIsOwner]         = useState(false);
+  const [authChecked,     setAuthChecked]     = useState(false);
   const [editMode,        setEditMode]        = useState(false);
   const [blocks,          setBlocks]          = useState(rep.blocks || []);
   const [previousBlocks,  setPreviousBlocks]  = useState(null);
@@ -424,6 +425,7 @@ function BlockPage({ rep }) {
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
+      setAuthChecked(true);
     });
   }, []);
 
@@ -485,7 +487,7 @@ function BlockPage({ rep }) {
       <style>{PAGE_STYLES}</style>
       <div className="bg-atmosphere" />
 
-      {isOwner && (
+      {authChecked && isOwner && (
         <OwnerMenu
           editMode={editMode}
           onToggleEdit={() => { setEditMode(e => !e); setEditingBlockId(null); }}
@@ -512,6 +514,7 @@ function BlockPage({ rep }) {
             idx={idx}
             isLast={idx === blocks.length - 1}
             editMode={editMode}
+            authChecked={authChecked}
             isOwner={isOwner}
             isEditing={editingBlockId === block.id}
             rep={rep}
@@ -528,7 +531,7 @@ function BlockPage({ rep }) {
           />
         ))}
 
-        {editMode && (
+        {authChecked && editMode && (
           <AddBlockZone onInsert={(nb) => handleInsertBlock(blocks.length - 1, nb)} />
         )}
 
@@ -549,7 +552,7 @@ function BlockPage({ rep }) {
 // ─── Block slot ───────────────────────────────────────────────────────────────
 
 function BlockSlot({
-  block, idx, isLast, editMode, isEditing,
+  block, idx, isLast, editMode, authChecked, isEditing,
   rep, defaults,
   onEdit, onCancelEdit, onSave,
   onToggleVisible, onMoveUp, onMoveDown, onDelete, onInsertAfter,
@@ -558,7 +561,7 @@ function BlockSlot({
 
   return (
     <div style={{ marginBottom: 28 }}>
-      {editMode && (
+      {authChecked && editMode && (
         <div className="block-edit-bar">
           <button className="block-btn" onClick={onToggleVisible} title={isHidden ? 'Show' : 'Hide'} style={{ opacity: isHidden ? 0.4 : 1 }}>
             {isHidden ? '🙈' : '👁'}
@@ -577,7 +580,7 @@ function BlockSlot({
         }
       </div>
 
-      {editMode && <AddBlockZone onInsert={onInsertAfter} />}
+      {authChecked && editMode && <AddBlockZone onInsert={onInsertAfter} />}
     </div>
   );
 }
