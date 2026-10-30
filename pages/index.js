@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
+import SiteMeta from '../components/SiteMeta';
+import Logo from '../components/Logo';
 
 export default function Home() {
   const [formData, setFormData] = useState({ name: '', email: '', industry: '' });
@@ -65,6 +67,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
       </Head>
+      <SiteMeta title="ProPages – The only link-in-bio built for sales." />
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -113,14 +116,6 @@ export default function Home() {
           align-items: center;
           text-decoration: none;
         }
-        .nav-logo-text {
-          font-size: 16px;
-          font-weight: 800;
-          color: var(--white);
-          letter-spacing: -0.3px;
-          font-family: 'DM Sans', sans-serif;
-        }
-        .nav-logo-text span { color: var(--purple); }
         .nav-links { display: flex; align-items: center; gap: 24px; }
         .nav-link {
           font-size: 13px;
@@ -1356,8 +1351,8 @@ export default function Home() {
 
       {/* NAV */}
       <nav className="nav">
-        <a href="/" className="nav-logo">
-          <span className="nav-logo-text">pro<span>pages</span></span>
+        <a href="/" className="nav-logo" aria-label="ProPages home">
+          <Logo height={24} />
         </a>
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
@@ -1862,7 +1857,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <div className="footer">
-        <div className="footer-wordmark">PROPAGES</div>
+        <div className="footer-wordmark" style={{ display: 'flex', justifyContent: 'center' }}><Logo height={22} glow={false} /></div>
         <p className="footer-tag">Built for the reps who show up every day.</p>
         <p className="footer-copy">© 2026 ProPages. All rights reserved.</p>
       </div>

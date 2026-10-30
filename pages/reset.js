@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
 import Head from 'next/head';
+import Logo from '../components/Logo';
 
 export default function Reset() {
   const router = useRouter();
@@ -66,8 +67,7 @@ export default function Reset() {
         }
         body { background-color: var(--sky); color: var(--white); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
         .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 420px; }
-        .logo { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; color: var(--white); margin-bottom: 28px; text-align: center; }
-        .logo span { color: var(--sun); }
+        .logo { display: flex; justify-content: center; margin-bottom: 28px; }
         .card-headline { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; color: var(--white); margin-bottom: 8px; text-align: center; }
         .card-sub { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 28px; }
         .input { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 12px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; margin-bottom: 12px; }
@@ -80,7 +80,7 @@ export default function Reset() {
       `}</style>
 
       <div className="card">
-        <div className="logo">PRO<span>PAGES</span></div>
+        <div className="logo"><Logo height={28} /></div>
 
         {!ready ? (
           <>

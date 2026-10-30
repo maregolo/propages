@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import SiteMeta from '../components/SiteMeta';
+import Logo from '../components/Logo';
 import { useRouter } from 'next/router';
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -57,6 +59,7 @@ export default function CoachesLanding() {
         <meta name="robots" content="noindex, nofollow" />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
       </Head>
+      <SiteMeta title="ProPages for Coaches – The link-in-bio that books your calls." path="/coaches" />
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,8 +101,6 @@ export default function CoachesLanding() {
           top: 0;
           z-index: 100;
         }
-        .nav-logo-text { font-size: 16px; font-weight: 800; color: var(--white); letter-spacing: -0.3px; }
-        .nav-logo-text span { color: var(--purple); }
 
         /* ── HERO ── */
         .hero { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 57px); overflow: hidden; }
@@ -205,7 +206,7 @@ export default function CoachesLanding() {
 
       {/* NAV — wordmark only, no site nav, no login (ad-traffic page) */}
       <nav className="nav">
-        <span className="nav-logo-text">pro<span>pages</span></span>
+        <Logo height={24} />
       </nav>
 
       {/* HERO */}
@@ -343,7 +344,7 @@ export default function CoachesLanding() {
 
       {/* FOOTER */}
       <div className="footer">
-        <div className="footer-wordmark">PROPAGES</div>
+        <div className="footer-wordmark" style={{ display: 'flex', justifyContent: 'center' }}><Logo height={22} glow={false} /></div>
         <p className="footer-tag">Built for the coaches who show up every day.</p>
         <p className="footer-copy">© 2026 ProPages. All rights reserved.</p>
       </div>
