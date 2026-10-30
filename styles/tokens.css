@@ -1,0 +1,124 @@
+/* ─── ProPages site tokens (marketing site + app chrome) ───────────────────────
+ *
+ * Source of truth for the redesign: claude/BRAND.md + claude/REDESIGN-NOTES.md
+ * in the ProPages project. Imported once in pages/_app.js.
+ *
+ * Prefix is --site-* on purpose: rep pages use the theme-pack variables
+ * (--pp-*, lib/themes.js), and the two systems must never collide.
+ */
+
+:root {
+  /* Type — the Outfit variable font is loaded by lib/fonts.js (next/font/local)
+     and exposed as --font-outfit; this falls back cleanly before it applies. */
+  --site-font: var(--font-outfit), system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Color — v14 "blue slate" field, mint reserved for primary actions,
+     coral for highlights, progress and selection. */
+  --site-dark: #27303A;          /* hero / app field */
+  --site-dark-2: #323C47;        /* cards and nav pill on dark */
+  --site-frame: #181E25;         /* text on mint buttons */
+  --site-on-dark: #EEF1F4;       /* primary text on dark */
+  --site-on-dark-2: #BAC4CE;     /* secondary text on dark (7.4:1) */
+  --site-ink: #222A33;           /* primary text on light */
+  --site-ink-2: #3F4743;         /* body text on light */
+  --site-muted: #5E6762;         /* secondary text on light (5.9:1) */
+  --site-page: #F8F9FA;          /* light page */
+  --site-tint: #EFF2F5;          /* light section tint */
+  --site-line: #E3E8E5;          /* hairlines on light */
+  --site-line-strong: #C9D0CC;   /* outline buttons on light */
+
+  --site-mint: #8EF0B8;          /* primary-action color — CTAs only */
+  --site-mint-ink: #0F7A4A;      /* mint as text/icons on light (5.4:1) */
+  --site-coral: #FFB59C;         /* highlight on dark */
+  --site-coral-ink: #B23E22;     /* highlight as text on light */
+  --site-coral-wash: #FFEDE6;
+
+  /* The "lit" mint CTA — same treatment as the homepage counter bar. */
+  --site-cta-bg: linear-gradient(180deg, #A9F6CB 0%, #86EDB2 55%, #6FDF9F 100%);
+  --site-cta-shadow: inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(11,59,36,0.22), 0 10px 24px -10px rgba(11,59,36,0.5);
+
+  /* Layout — one container for every marketing section. Content is capped at
+     --site-wrap; side margins grow from 20px (phone) to 64px (wide screens). */
+  --site-wrap: 1440px;
+  --site-gut: clamp(20px, 4.5vw, 64px);
+  --site-cw: min(calc(100vw - 2 * var(--site-gut)), var(--site-wrap));
+  --site-app-col: 560px;         /* signup / setup / dashboard phone-first column */
+
+  /* Radii — pills for buttons only, 10px fields, 16px small cards, 28px panels. */
+  --site-r-field: 10px;
+  --site-r-card: 16px;
+  --site-r-panel: 28px;
+  --site-r-pill: 9999px;
+
+  /* Focus */
+  --site-focus: 0 0 0 2px var(--site-page), 0 0 0 4px var(--site-mint-ink);
+}
+
+/* ── Container ─────────────────────────────────────────────────────────────── */
+.site-container {
+  max-width: var(--site-wrap);
+  margin: 0 auto;
+  padding-inline: var(--site-gut);
+}
+
+/* ── Headlines: scale with the content width ──────────────────────────────────
+   Sizes are the homepage values at a 1280px content width; they shrink to a
+   floor on phones and stop growing at 1.125× on wide screens, so lines break
+   in the same places from a laptop up. */
+.site-h-hero    { font-size: clamp(46px, calc(var(--site-cw) * 0.06953), 100.1px); line-height: 0.87; }
+.site-h-closing { font-size: clamp(48px, calc(var(--site-cw) * 0.07188), 103.5px); line-height: 0.85; }
+.site-h-section { font-size: clamp(36px, calc(var(--site-cw) * 0.04922), 70.9px);  line-height: 0.95; }
+.site-h-feature { font-size: clamp(30px, calc(var(--site-cw) * 0.03594), 51.8px);  line-height: 1; }
+.site-h-hero, .site-h-closing, .site-h-section, .site-h-feature {
+  font-family: var(--site-font);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.site-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border: none;
+  border-radius: var(--site-r-pill);
+  font-family: var(--site-font);
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.site-btn:hover { transform: translateY(-1px); filter: brightness(1.03); }
+.site-btn:focus-visible { outline: none; box-shadow: var(--site-focus); }
+.site-btn--primary { background: var(--site-cta-bg); box-shadow: var(--site-cta-shadow); color: var(--site-frame); }
+.site-btn--primary:focus-visible { box-shadow: var(--site-cta-shadow), var(--site-focus); }
+.site-btn--outline-dark  { background: transparent; color: var(--site-on-dark); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
+.site-btn--outline-light { background: transparent; color: var(--site-ink);     box-shadow: inset 0 0 0 1px var(--site-line-strong); }
+.site-btn--block { width: 100%; }
+
+/* ── Form fields (same on light and dark: white, 54px, 10px radius) ───────── */
+.site-label { display: block; font-family: var(--site-font); font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.site-field {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  padding: 0 18px;
+  border-radius: var(--site-r-field);
+  border: 1px solid #868685;
+  background: #FFFFFF;
+  color: var(--site-ink);
+  font-family: var(--site-font);
+  font-size: 17px;
+}
+.site-field::placeholder { color: #6B747B; }
+.site-field:focus { outline: none; box-shadow: var(--site-focus); }
+.site-on-dark .site-field { border-color: transparent; }
+
+/* ── Eyebrow: plain tracked uppercase text (no pills — pills are buttons only) */
+.site-eyebrow { font-family: var(--site-font); font-size: 13px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
