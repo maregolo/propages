@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
+import { getTheme, DEFAULT_THEME } from '../lib/themes';
+import ThemePicker from '../components/ThemePicker';
 
 // ─── Default block stack written at signup ────────────────────────────────────
 
@@ -73,7 +75,10 @@ export default function Setup() {
   const [photo,          setPhoto]          = useState(null);
   const [photoPreview,   setPhotoPreview]   = useState(null);
 
-  // Step 2 fields
+  // Step 2 field (theme)
+  const [accent, setAccent] = useState(DEFAULT_THEME);
+
+  // Step 3 fields
   const [instagram,  setInstagram]  = useState('');
   const [tiktok,     setTiktok]     = useState('');
   const [calendly,   setCalendly]   = useState('');
@@ -82,13 +87,6 @@ export default function Setup() {
   const [otherLabel, setOtherLabel] = useState('');
 
   useEffect(() => {
-    // DEV BYPASS — remove before launch
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === 'letmein') {
-      setUser({ id: '00000000-0000-0000-0000-' + String(Date.now()).padStart(12, '0') });
-      setLoading(false);
-      return;
-    }
-
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
         router.push('/signup');
@@ -209,18 +207,15 @@ export default function Setup() {
 
     setSaving(true);
 
-    const isDevBypass = user.id.startsWith('00000000-0000-0000-0000-');
-    if (!isDevBypass) {
-      const { data: existingRep } = await supabase
-        .from('reps')
-        .select('slug')
-        .eq('auth_id', user.id)
-        .maybeSingle();
+    const { data: existingRep } = await supabase
+      .from('reps')
+      .select('slug')
+      .eq('auth_id', user.id)
+      .maybeSingle();
 
-      if (existingRep?.slug) {
-        router.push('/dashboard');
-        return;
-      }
+    if (existingRep?.slug) {
+      router.push('/dashboard');
+      return;
     }
 
     // Upload photo if provided
@@ -247,6 +242,8 @@ export default function Setup() {
       slug, name, title, city, industry, employmentType, photo_url
     );
 
+    const referredBy = typeof window !== 'undefined' ? localStorage.getItem('pp_referral_ref') : null;
+
     const { error: insertError } = await supabase.from('reps').insert({
       slug,
       name,
@@ -256,8 +253,12 @@ export default function Setup() {
       employment_type: employmentType,
       phone: phone || null,
       photo_url,
-      auth_id: isDevBypass ? null : user.id,
+      auth_id: user.id,
       blocks,
+      referred_by: referredBy || null,
+      accent: DEFAULT_THEME,
+      theme: getTheme(DEFAULT_THEME).mode,
+      font_pair: 'default',
     });
 
     if (insertError) {
@@ -266,12 +267,34 @@ export default function Setup() {
       return;
     }
 
+    // Clear referral ref now that it's been written
+    if (typeof window !== 'undefined') localStorage.removeItem('pp_referral_ref');
+
     setSaving(false);
     setSavedSlug(slug);
     setStep(2);
   }
 
-  async function handleStep2Submit(skipLinks) {
+  async function handleThemeSubmit() {
+    setError('');
+    setSaving(true);
+
+    const { error: themeError } = await supabase
+      .from('reps')
+      .update({ accent, theme: getTheme(accent).mode })
+      .eq('slug', savedSlug);
+
+    setSaving(false);
+
+    if (themeError) {
+      setError(themeError.message || 'Something went wrong. Please try again.');
+      return;
+    }
+
+    setStep(3);
+  }
+
+  async function handleLinksSubmit(skipLinks) {
     setSaving(true);
 
     if (!skipLinks) {
@@ -320,6 +343,13 @@ export default function Setup() {
             <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>Set up your ProPage in under 2 minutes.</p>
           </>}
           {step === 2 && <>
+            <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Pick Your Style</h1>
+            <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>
+              Your page is live at <span style={{ color: '#F5A623' }}>propages.com/{savedSlug}</span>
+              <br />Choose a look. You can change this anytime.
+            </p>
+          </>}
+          {step === 3 && <>
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Add Your Links</h1>
             <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>
               Your page is live at <span style={{ color: '#F5A623' }}>propages.com/{savedSlug}</span>
@@ -330,7 +360,7 @@ export default function Setup() {
 
         {/* Step indicator */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-          {[1, 2].map(n => (
+          {[1, 2, 3].map(n => (
             <div key={n} style={{
               width: n === step ? 24 : 8,
               height: 8,
@@ -411,6 +441,25 @@ export default function Setup() {
                 <option value="windows">Windows & Doors</option>
                 <option value="hvac">HVAC</option>
                 <option value="security">Home Security</option>
+                <option value="landscaping">Lawn Care & Landscaping</option>
+                <option value="moving">Moving Services</option>
+                <option value="exterior_remodel">Gutters, Siding & Exterior Remodel</option>
+                <option value="real_estate">Real Estate</option>
+                <option value="mortgage">Mortgage / Lending</option>
+                <option value="property_management">Property Management</option>
+                <option value="str_hosts">Short-Term Rentals & Property Investing</option>
+                <option value="financial_advisor">Financial Advising</option>
+                <option value="insurance">Insurance</option>
+                <option value="life_coach">Life & Business Coaching</option>
+                <option value="fitness_coach">Fitness & Health Coaching</option>
+                <option value="sales_coach">Sales Coaching & Training</option>
+                <option value="career_coach">Career & Executive Coaching</option>
+                <option value="marketing_consultant">Marketing Consulting</option>
+                <option value="designer">Web & Graphic Design</option>
+                <option value="photographer">Photography & Video</option>
+                <option value="writer">Copywriting & Content</option>
+                <option value="personal_trainer">Personal Training</option>
+                <option value="medspa">Med Spa & Aesthetics</option>
                 <option value="other">Other</option>
               </select>
             </div>
@@ -472,14 +521,51 @@ export default function Setup() {
                 boxShadow: '0 8px 32px rgba(245,166,35,0.3)',
               }}
             >
-              {saving ? 'Setting up your page...' : 'Next: Add Your Links →'}
+              {saving ? 'Setting up your page...' : 'Next: Pick a Theme →'}
             </button>
 
           </form>
         )}
 
-        {/* ── STEP 2 ── */}
+        {/* ── STEP 2: THEME ── */}
         {step === 2 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            <div style={{
+              background: 'rgba(0,229,190,0.06)',
+              border: '1px solid rgba(0,229,190,0.2)',
+              borderRadius: 12,
+              padding: '12px 16px',
+              fontSize: 13,
+              color: '#00E5BE',
+              marginBottom: 4,
+            }}>
+              ✓ Your page is live! Pick a theme, or skip and use the default.
+            </div>
+
+            <ThemePicker selectedTheme={accent} onSelect={setAccent} />
+
+            {error && <p style={{ fontSize: 13, color: '#FF6B6B', textAlign: 'center' }}>{error}</p>}
+
+            <button
+              onClick={handleThemeSubmit}
+              disabled={saving}
+              style={{
+                width: '100%', padding: '16px', marginTop: 8,
+                background: saving ? '#8899AA' : 'linear-gradient(135deg, #F5A623, #FFD166)',
+                color: '#0A1628', fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700,
+                border: 'none', borderRadius: 14, cursor: saving ? 'not-allowed' : 'pointer',
+                boxShadow: '0 8px 32px rgba(245,166,35,0.3)',
+              }}
+            >
+              {saving ? 'Saving...' : 'Next: Add Your Links →'}
+            </button>
+
+          </div>
+        )}
+
+        {/* ── STEP 3: LINKS ── */}
+        {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
             <div style={{
@@ -542,7 +628,7 @@ export default function Setup() {
             {error && <p style={{ fontSize: 13, color: '#FF6B6B', textAlign: 'center' }}>{error}</p>}
 
             <button
-              onClick={() => handleStep2Submit(false)}
+              onClick={() => handleLinksSubmit(false)}
               disabled={saving}
               style={{
                 width: '100%', padding: '16px', marginTop: 8,
@@ -556,7 +642,7 @@ export default function Setup() {
             </button>
 
             <button
-              onClick={() => handleStep2Submit(true)}
+              onClick={() => handleLinksSubmit(true)}
               disabled={saving}
               style={{
                 width: '100%', padding: '14px',
