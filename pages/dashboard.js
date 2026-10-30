@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Logo from '../components/Logo';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -137,7 +138,7 @@ export default function Dashboard() {
 
         {/* Top bar */}
         <div style={styles.topbar}>
-          <div style={styles.brand}>PROPAGES</div>
+          <Logo height={22} />
           <div style={styles.avatarWrap}>
             {rep.photo_url
               ? <img src={rep.photo_url} alt={rep.name} style={styles.avatarImg} />
@@ -319,13 +320,6 @@ const styles = {
     alignItems: 'center',
     padding: '20px 0 0',
     marginBottom: 32,
-  },
-  brand: {
-    fontFamily: 'monospace',
-    fontSize: 13,
-    fontWeight: 700,
-    letterSpacing: 3,
-    color: '#445566',
   },
   avatarWrap: {
     display: 'flex',

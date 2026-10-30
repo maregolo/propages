@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Logo from '../components/Logo';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
 import { getTheme, DEFAULT_THEME } from '../lib/themes';
@@ -337,7 +338,7 @@ export default function Setup() {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 13, letterSpacing: 3, color: '#8899AA', marginBottom: 16 }}>PROPAGES</div>
+          <div style={{ marginBottom: 16 }}><Logo height={20} /></div>
           {step === 1 && <>
             <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Claim Your Page</h1>
             <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>Set up your ProPage in under 2 minutes.</p>

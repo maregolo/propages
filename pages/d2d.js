@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import SiteMeta from '../components/SiteMeta';
+import Logo from '../components/Logo';
 import { useRouter } from 'next/router';
 
 export default function D2DLanding() {
@@ -62,6 +64,7 @@ export default function D2DLanding() {
         <meta name="robots" content="noindex" />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
       </Head>
+      <SiteMeta title="ProPages — Your page stays open, even when the door closes." path="/d2d" />
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,13 +99,6 @@ export default function D2DLanding() {
           align-items: center;
           padding: 16px 40px;
           border-bottom: 1px solid var(--card-border);
-        }
-        .lp-wordmark {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 4px;
-          color: #556677;
-          font-family: monospace;
         }
 
         /* ── HERO ── */
@@ -512,7 +508,7 @@ export default function D2DLanding() {
 
       {/* NAV — wordmark only */}
       <nav className="lp-nav">
-        <div className="lp-wordmark">PROPAGES</div>
+        <Logo height={20} />
       </nav>
 
       {/* HERO */}
