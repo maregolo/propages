@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import Logo from '../components/Logo';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
-import { getTheme, DEFAULT_THEME } from '../lib/themes';
-import ThemePicker from '../components/ThemePicker';
+import { THEMES, getTheme, DEFAULT_THEME } from '../lib/themes';
+import AppShell, { AppLoading, Intro, Alert } from '../components/site/AppShell';
+import Button from '../components/site/Button';
+import Field from '../components/site/Field';
+import Icon from '../components/site/icons';
+import { DOMAIN } from '../components/site/HandleField';
 
 // ─── Default block stack written at signup ────────────────────────────────────
 
@@ -88,41 +91,6 @@ export default function Setup() {
   const [otherLink,  setOtherLink]  = useState('');
   const [otherLabel, setOtherLabel] = useState('');
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
-        router.push('/signup');
-        return;
-      }
-      setUser(session.user);
-
-      const { data: existing } = await supabase
-        .from('reps')
-        .select('slug')
-        .eq('auth_id', session.user.id)
-        .maybeSingle();
-
-      if (existing?.slug) {
-        router.push('/dashboard');
-        return;
-      }
-
-      // Handle claimed on the homepage ("propages.com/[yourname]" field)
-      try {
-        const claimed = localStorage.getItem('pp_claim_handle');
-        if (claimed) {
-          const clean = generateSlug(claimed);
-          if (clean) {
-            claimedSlug.current = true;
-            setSlug(clean);
-            checkSlug(clean);
-          }
-        }
-      } catch (err) { /* storage unavailable */ }
-
-      setLoading(false);
-    });
-  }, []);
 
   function generateSlug(val) {
     return val
@@ -158,6 +126,42 @@ export default function Setup() {
       .maybeSingle();
     setSlugAvailable(!data);
   }
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        router.push('/signup');
+        return;
+      }
+      setUser(session.user);
+
+      const { data: existing } = await supabase
+        .from('reps')
+        .select('slug')
+        .eq('auth_id', session.user.id)
+        .maybeSingle();
+
+      if (existing?.slug) {
+        router.push('/dashboard');
+        return;
+      }
+
+      // Handle claimed on the homepage ("propages.com/[yourname]" field)
+      try {
+        const claimed = localStorage.getItem('pp_claim_handle');
+        if (claimed) {
+          const clean = generateSlug(claimed);
+          if (clean) {
+            claimedSlug.current = true;
+            setSlug(clean);
+            checkSlug(clean);
+          }
+        }
+      } catch (err) { /* storage unavailable */ }
+
+      setLoading(false);
+    });
+  }, []);
 
   function handlePhotoChange(e) {
     const file = e.target.files[0];
@@ -345,354 +349,258 @@ export default function Setup() {
     router.push(`/${savedSlug}?new=true`);
   }
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0A1628', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F8F5EE', fontFamily: 'sans-serif' }}>
-      Loading...
+  if (loading) return <AppLoading />;
+
+  const opt = <span className="opt">(optional)</span>;
+  const live = (
+    <div className="site-chip" style={{ justifyContent: 'flex-start' }}>
+      <span className="site-chip__live" aria-hidden="true" />
+      <span>Your page is live at <strong>{DOMAIN}/{savedSlug}</strong></span>
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A1628', color: '#F8F5EE', fontFamily: 'DM Sans, sans-serif', padding: '40px 20px 80px' }}>
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+    <AppShell title="Set up your page" width={560} step={step} steps={3}>
+      <main className="site-app__main">
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ marginBottom: 16 }}><Logo height={20} /></div>
-          {step === 1 && <>
-            <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Claim Your Page</h1>
-            <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>Set up your ProPage in under 2 minutes.</p>
-          </>}
-          {step === 2 && <>
-            <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Pick Your Style</h1>
-            <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>
-              Your page is live at <span style={{ color: '#F5A623' }}>propages.com/{savedSlug}</span>
-              <br />Choose a look. You can change this anytime.
-            </p>
-          </>}
-          {step === 3 && <>
-            <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 36, letterSpacing: 2, marginBottom: 8 }}>Add Your Links</h1>
-            <p style={{ fontSize: 14, color: '#8899AA', lineHeight: 1.6 }}>
-              Your page is live at <span style={{ color: '#F5A623' }}>propages.com/{savedSlug}</span>
-              <br />Add your links so visitors have somewhere to go.
-            </p>
-          </>}
-        </div>
-
-        {/* Step indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-          {[1, 2, 3].map(n => (
-            <div key={n} style={{
-              width: n === step ? 24 : 8,
-              height: 8,
-              borderRadius: 4,
-              background: n === step ? '#F5A623' : n < step ? '#00E5BE' : 'rgba(255,255,255,0.12)',
-              transition: 'all 0.3s ease',
-            }} />
-          ))}
-        </div>
-
-        {/* ── STEP 1 ── */}
+        {/* ── STEP 1: profile ── */}
         {step === 1 && (
-          <form onSubmit={handleStep1Submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <>
+            <Intro title="Claim your page.">Set up your ProPage in under 2 minutes.</Intro>
 
-            {/* Photo */}
-            <div style={{ textAlign: 'center', marginBottom: 8 }}>
-              <label htmlFor="photo-upload" style={{ cursor: 'pointer' }}>
-                <div style={{
-                  width: 88, height: 88, borderRadius: '50%', margin: '0 auto 10px',
-                  background: photoPreview ? 'transparent' : 'linear-gradient(135deg, #1D3461, #112240)',
-                  border: '2px solid #F5A623',
-                  overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'Bebas Neue, sans-serif', fontSize: 32, color: '#F5A623',
+            <form className="site-app__form" style={{ gap: 24 }} onSubmit={handleStep1Submit}>
+
+              {/* Photo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                <div aria-hidden="true" style={{
+                  width: 80, height: 80, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+                  background: 'var(--site-dark-2)',
+                  border: photoPreview ? '2px solid var(--site-coral)' : '2px dashed rgba(255,255,255,0.22)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 30, fontWeight: 700, color: 'var(--site-coral)',
                 }}>
                   {photoPreview
-                    ? <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : (name ? name.charAt(0).toUpperCase() : '?')}
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={photoPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : (name ? name.charAt(0).toUpperCase() : <Icon name="person" size={28} />)}
                 </div>
-                <div style={{ fontSize: 13, color: '#8899AA' }}>Tap to add a photo <span style={{ color: '#F5A623' }}>(optional)</span></div>
-              </label>
-              <input id="photo-upload" type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
-            </div>
-
-            {/* Name */}
-            <div>
-              <label style={labelStyle}>Your Name *</label>
-              <input style={inputStyle} type="text" placeholder="Jake Rivera" value={name} onChange={handleNameChange} />
-            </div>
-
-            {/* Handle */}
-            <div>
-              <label style={labelStyle}>Your Handle *</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8899AA', fontSize: 15 }}>propages.com/</span>
-                <input
-                  style={{ ...inputStyle, paddingLeft: 130 }}
-                  type="text"
-                  placeholder="jake-rivera"
-                  value={slug}
-                  onChange={handleSlugChange}
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+                  <label htmlFor="photo-upload" className="site-btn site-btn--outline-dark" style={{ minHeight: 44, padding: '0 18px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                    <Icon name="camera" />{photoPreview ? 'Change photo' : 'Add a photo'}
+                  </label>
+                  <input id="photo-upload" type="file" accept="image/*" onChange={handlePhotoChange} className="sr-only" style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />
+                  <span style={{ fontSize: 13, color: 'var(--site-on-dark-2)' }}>Optional · pages with a photo look more trustworthy</span>
+                </div>
               </div>
-              {slug.length >= 3 && slugAvailable === true  && <div style={{ fontSize: 12, color: '#00E5BE', marginTop: 4 }}>✓ Available</div>}
-              {slug.length >= 3 && slugAvailable === false && <div style={{ fontSize: 12, color: '#FF6B6B', marginTop: 4 }}>✗ Already taken — try another</div>}
-              {slug.length > 0 && slug.length < 3          && <div style={{ fontSize: 12, color: '#8899AA', marginTop: 4 }}>Handle must be at least 3 characters</div>}
-            </div>
 
-            {/* Title */}
-            <div>
-              <label style={labelStyle}>Your Title <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input style={inputStyle} type="text" placeholder="Solar Energy Consultant" value={title} onChange={e => setTitle(e.target.value)} />
-            </div>
+              <Field label="Your name" type="text" autoComplete="name" placeholder="Jake Rivera" value={name} onChange={handleNameChange} />
 
-            {/* City */}
-            <div>
-              <label style={labelStyle}>Your City <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input style={inputStyle} type="text" placeholder="Phoenix, AZ" value={city} onChange={e => setCity(e.target.value)} />
-            </div>
-
-            {/* Industry */}
-            <div>
-              <label style={labelStyle}>Industry *</label>
-              <select style={inputStyle} value={industry} onChange={e => setIndustry(e.target.value)}>
-                <option value="">Select your industry...</option>
-                <option value="solar">Solar Energy</option>
-                <option value="roofing">Roofing</option>
-                <option value="pest">Pest Control</option>
-                <option value="windows">Windows & Doors</option>
-                <option value="hvac">HVAC</option>
-                <option value="security">Home Security</option>
-                <option value="landscaping">Lawn Care & Landscaping</option>
-                <option value="moving">Moving Services</option>
-                <option value="exterior_remodel">Gutters, Siding & Exterior Remodel</option>
-                <option value="real_estate">Real Estate</option>
-                <option value="mortgage">Mortgage / Lending</option>
-                <option value="property_management">Property Management</option>
-                <option value="str_hosts">Short-Term Rentals & Property Investing</option>
-                <option value="financial_advisor">Financial Advising</option>
-                <option value="insurance">Insurance</option>
-                <option value="life_coach">Life & Business Coaching</option>
-                <option value="fitness_coach">Fitness & Health Coaching</option>
-                <option value="sales_coach">Sales Coaching & Training</option>
-                <option value="career_coach">Career & Executive Coaching</option>
-                <option value="marketing_consultant">Marketing Consulting</option>
-                <option value="designer">Web & Graphic Design</option>
-                <option value="photographer">Photography & Video</option>
-                <option value="writer">Copywriting & Content</option>
-                <option value="personal_trainer">Personal Training</option>
-                <option value="medspa">Med Spa & Aesthetics</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            {/* Employment type */}
-            <div>
-              <label style={labelStyle}>Are you... *</label>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {['independent', 'employee'].map(type => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setEmploymentType(type)}
-                    style={{
-                      flex: 1, padding: '12px 10px', borderRadius: 12, cursor: 'pointer',
-                      fontFamily: 'DM Sans, sans-serif', fontSize: 14, fontWeight: 600,
-                      border: employmentType === type ? '1px solid #F5A623' : '1px solid rgba(255,255,255,0.08)',
-                      background: employmentType === type ? 'rgba(245,166,35,0.08)' : 'rgba(255,255,255,0.04)',
-                      color: employmentType === type ? '#F5A623' : '#8899AA',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {type === 'independent' ? '🧑‍💼 Independent' : '🏢 Employee'}
-                  </button>
-                ))}
+              {/* Handle */}
+              <div>
+                <label className="site-label" htmlFor="setup-handle">Your handle</label>
+                <label className="site-handle" htmlFor="setup-handle">
+                  <span className="site-handle__prefix">{DOMAIN}/</span>
+                  <input
+                    id="setup-handle"
+                    type="text"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    placeholder="jake-rivera"
+                    value={slug}
+                    onChange={handleSlugChange}
+                    aria-describedby="handle-status"
+                  />
+                  {slug.length >= 3 && slugAvailable === true && <Icon name="check" size={20} strokeWidth={2.5} style={{ color: 'var(--site-mint-ink)' }} />}
+                </label>
+                <span id="handle-status" aria-live="polite">
+                  {slug.length >= 3 && slugAvailable === true  && <span className="site-status site-status--ok">Available, this one&apos;s yours.</span>}
+                  {slug.length >= 3 && slugAvailable === false && <span className="site-status site-status--bad">Already taken. Try another.</span>}
+                  {slug.length > 0 && slug.length < 3          && <span className="site-status site-status--muted">Handles need at least 3 characters.</span>}
+                </span>
               </div>
-              {employmentType === 'employee' && (
-                <p style={{ fontSize: 12, color: '#8899AA', marginTop: 8, lineHeight: 1.5 }}>
-                  ⚠️ Heads up: make sure your employer is cool with you having your own page. ProPages is not responsible for any workplace conflicts.
-                </p>
-              )}
-            </div>
 
-            {/* Phone */}
-            <div>
-              <label style={labelStyle}>Your Phone Number <span style={{ color: '#8899AA' }}>(optional — for lead alerts)</span></label>
-              <input
-                style={inputStyle}
+              <div className="site-grid-2">
+                <Field label={<>Your title {opt}</>} type="text" placeholder="Solar Energy Consultant" value={title} onChange={e => setTitle(e.target.value)} />
+                <Field label={<>Your city {opt}</>} type="text" autoComplete="address-level2" placeholder="Phoenix, AZ" value={city} onChange={e => setCity(e.target.value)} />
+              </div>
+
+              {/* Industry */}
+              <div>
+                <label className="site-label" htmlFor="setup-industry">Industry</label>
+                <div className="site-select">
+                  <select id="setup-industry" className="site-field" value={industry} onChange={e => setIndustry(e.target.value)}>
+                    <option value="">Select your industry…</option>
+                    {INDUSTRIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <Icon name="chevronDown" size={20} />
+                </div>
+              </div>
+
+              {/* Employment type */}
+              <fieldset className="site-fieldset">
+                <legend>Are you…</legend>
+                <div className="site-choices">
+                  {[['independent', 'Independent', 'person'], ['employee', 'Employee', 'building']].map(([v, l, ic]) => (
+                    <label key={v} className="site-choice">
+                      <input type="radio" name="employment" value={v} checked={employmentType === v} onChange={() => setEmploymentType(v)} />
+                      <Icon name={ic} />{l}
+                    </label>
+                  ))}
+                </div>
+                {employmentType === 'employee' && (
+                  <p className="site-hint">Heads up: make sure your employer is okay with you having your own page. ProPages isn&apos;t responsible for workplace conflicts.</p>
+                )}
+              </fieldset>
+
+              <Field
+                label={<>Phone number {opt}</>}
                 type="tel"
-                placeholder="+1 (602) 555-0100"
+                autoComplete="tel"
+                placeholder="(602) 555-0100"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
+                hint="We'll text you the moment a lead comes in. US numbers only."
               />
-              <div style={{ fontSize: 12, color: '#8899AA', marginTop: 4 }}>
-                We&apos;ll text you the moment a lead comes in. US numbers only.
-              </div>
-            </div>
 
-            {error && <p style={{ fontSize: 13, color: '#FF6B6B', textAlign: 'center' }}>{error}</p>}
+              <Alert error={error} />
 
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                width: '100%', padding: '16px', marginTop: 8,
-                background: saving ? '#8899AA' : 'linear-gradient(135deg, #F5A623, #FFD166)',
-                color: '#0A1628', fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700,
-                border: 'none', borderRadius: 14, cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 8px 32px rgba(245,166,35,0.3)',
-              }}
-            >
-              {saving ? 'Setting up your page...' : 'Next: Pick a Theme →'}
-            </button>
-
-          </form>
+              <Button type="submit" size="app" block disabled={saving} arrow={!saving} style={{ marginTop: 8 }}>
+                {saving ? 'Setting up your page…' : 'Next: pick a theme'}
+              </Button>
+            </form>
+          </>
         )}
 
-        {/* ── STEP 2: THEME ── */}
+        {/* ── STEP 2: theme ── */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-            <div style={{
-              background: 'rgba(0,229,190,0.06)',
-              border: '1px solid rgba(0,229,190,0.2)',
-              borderRadius: 12,
-              padding: '12px 16px',
-              fontSize: 13,
-              color: '#00E5BE',
-              marginBottom: 4,
-            }}>
-              ✓ Your page is live! Pick a theme, or skip and use the default.
+          <>
+            <Intro title="Pick your style.">Choose a look. You can change it anytime.</Intro>
+            {live}
+            <fieldset className="site-fieldset">
+              <legend className="sr-only" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>Theme</legend>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+                {Object.entries(THEMES).map(([key, t]) => (
+                  <ThemeCard key={key} id={key} theme={t} checked={accent === key} onSelect={setAccent} />
+                ))}
+              </div>
+            </fieldset>
+            <Alert error={error} />
+            <div className="site-stack">
+              <Button type="button" size="app" block disabled={saving} arrow={!saving} onClick={handleThemeSubmit}>
+                {saving ? 'Saving…' : 'Next: add your links'}
+              </Button>
+              <Button type="button" variant="line-dark" block disabled={saving} onClick={() => { setError(''); setStep(3); }}>
+                Skip, use {getTheme(DEFAULT_THEME).label} for now
+              </Button>
             </div>
-
-            <ThemePicker selectedTheme={accent} onSelect={setAccent} />
-
-            {error && <p style={{ fontSize: 13, color: '#FF6B6B', textAlign: 'center' }}>{error}</p>}
-
-            <button
-              onClick={handleThemeSubmit}
-              disabled={saving}
-              style={{
-                width: '100%', padding: '16px', marginTop: 8,
-                background: saving ? '#8899AA' : 'linear-gradient(135deg, #F5A623, #FFD166)',
-                color: '#0A1628', fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700,
-                border: 'none', borderRadius: 14, cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 8px 32px rgba(245,166,35,0.3)',
-              }}
-            >
-              {saving ? 'Saving...' : 'Next: Add Your Links →'}
-            </button>
-
-          </div>
+          </>
         )}
 
-        {/* ── STEP 3: LINKS ── */}
+        {/* ── STEP 3: links ── */}
         {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-            <div style={{
-              background: 'rgba(0,229,190,0.06)',
-              border: '1px solid rgba(0,229,190,0.2)',
-              borderRadius: 12,
-              padding: '12px 16px',
-              fontSize: 13,
-              color: '#00E5BE',
-              marginBottom: 4,
-            }}>
-              ✓ Your page is live! Add your links below, or skip and do it later.
-            </div>
-
-            {/* Instagram */}
-            <div>
-              <label style={labelStyle}>📸 Instagram <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input style={inputStyle} type="text" placeholder="@yourusername or full URL" value={instagram} onChange={e => setInstagram(e.target.value)} />
-            </div>
-
-            {/* TikTok */}
-            <div>
-              <label style={labelStyle}>🎵 TikTok <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input style={inputStyle} type="text" placeholder="@yourusername or full URL" value={tiktok} onChange={e => setTiktok(e.target.value)} />
-            </div>
-
-            {/* Calendly */}
-            <div>
-              <label style={labelStyle}>📅 Booking Link <span style={{ color: '#8899AA' }}>(Calendly, Cal.com, etc.)</span></label>
-              <input style={inputStyle} type="text" placeholder="calendly.com/yourname" value={calendly} onChange={e => setCalendly(e.target.value)} />
-            </div>
-
-            {/* Website */}
-            <div>
-              <label style={labelStyle}>🌐 Website <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input style={inputStyle} type="text" placeholder="yoursite.com" value={website} onChange={e => setWebsite(e.target.value)} />
-            </div>
-
-            {/* Other */}
-            <div>
-              <label style={labelStyle}>🔗 Other Link <span style={{ color: '#8899AA' }}>(optional)</span></label>
-              <input
-                style={{ ...inputStyle, marginBottom: 8 }}
-                type="text"
-                placeholder="https://..."
-                value={otherLink}
-                onChange={e => setOtherLink(e.target.value)}
-              />
+          <>
+            <Intro title="Add your links.">Give visitors somewhere to go. Add what you have, skip the rest.</Intro>
+            {live}
+            <form className="site-app__form" style={{ gap: 22 }} onSubmit={e => { e.preventDefault(); handleLinksSubmit(false); }}>
+              <Field label={<IconLabel icon="instagram">Instagram</IconLabel>} type="text" autoCapitalize="none" placeholder="@yourusername or full URL" value={instagram} onChange={e => setInstagram(e.target.value)} />
+              <Field label={<IconLabel icon="tiktok">TikTok</IconLabel>} type="text" autoCapitalize="none" placeholder="@yourusername or full URL" value={tiktok} onChange={e => setTiktok(e.target.value)} />
+              <Field label={<IconLabel icon="calendar">Booking link <span className="opt">(Calendly, Cal.com…)</span></IconLabel>} type="text" autoCapitalize="none" placeholder="calendly.com/yourname" value={calendly} onChange={e => setCalendly(e.target.value)} />
+              <Field label={<IconLabel icon="globe">Website</IconLabel>} type="text" autoCapitalize="none" placeholder="yoursite.com" value={website} onChange={e => setWebsite(e.target.value)} />
+              <Field label={<IconLabel icon="link">Other link</IconLabel>} type="text" autoCapitalize="none" placeholder="https://…" value={otherLink} onChange={e => setOtherLink(e.target.value)} />
               {otherLink && (
-                <input
-                  style={inputStyle}
-                  type="text"
-                  placeholder='Label (e.g. "Watch My Explainer Video")'
-                  value={otherLabel}
-                  onChange={e => setOtherLabel(e.target.value)}
-                />
+                <Field label="Button label for that link" type="text" placeholder="e.g. Watch my explainer video" value={otherLabel} onChange={e => setOtherLabel(e.target.value)} />
               )}
-            </div>
 
-            {error && <p style={{ fontSize: 13, color: '#FF6B6B', textAlign: 'center' }}>{error}</p>}
+              <Alert error={error} />
 
-            <button
-              onClick={() => handleLinksSubmit(false)}
-              disabled={saving}
-              style={{
-                width: '100%', padding: '16px', marginTop: 8,
-                background: saving ? '#8899AA' : 'linear-gradient(135deg, #F5A623, #FFD166)',
-                color: '#0A1628', fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 700,
-                border: 'none', borderRadius: 14, cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: '0 8px 32px rgba(245,166,35,0.3)',
-              }}
-            >
-              {saving ? 'Saving...' : 'Save & View My Page →'}
-            </button>
-
-            <button
-              onClick={() => handleLinksSubmit(true)}
-              disabled={saving}
-              style={{
-                width: '100%', padding: '14px',
-                background: 'transparent',
-                color: '#8899AA', fontFamily: 'DM Sans, sans-serif', fontSize: 14, fontWeight: 500,
-                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14,
-                cursor: saving ? 'not-allowed' : 'pointer',
-              }}
-            >
-              Skip for now — I&apos;ll add links later
-            </button>
-
-          </div>
+              <div className="site-stack" style={{ marginTop: 8 }}>
+                <Button type="submit" size="app" block disabled={saving} arrow={!saving}>
+                  {saving ? 'Saving…' : 'Save & view my page'}
+                </Button>
+                <Button type="button" variant="line-dark" block disabled={saving} onClick={() => handleLinksSubmit(true)}>
+                  Skip for now, I&apos;ll add links later
+                </Button>
+              </div>
+            </form>
+          </>
         )}
 
-      </div>
-    </div>
+      </main>
+    </AppShell>
   );
 }
 
-const labelStyle = {
-  display: 'block', fontSize: 13, fontWeight: 600,
-  color: '#F8F5EE', marginBottom: 6,
-};
+const INDUSTRIES = [
+  ['solar', 'Solar Energy'],
+  ['roofing', 'Roofing'],
+  ['pest', 'Pest Control'],
+  ['windows', 'Windows & Doors'],
+  ['hvac', 'HVAC'],
+  ['security', 'Home Security'],
+  ['landscaping', 'Lawn Care & Landscaping'],
+  ['moving', 'Moving Services'],
+  ['exterior_remodel', 'Gutters, Siding & Exterior Remodel'],
+  ['real_estate', 'Real Estate'],
+  ['mortgage', 'Mortgage / Lending'],
+  ['property_management', 'Property Management'],
+  ['str_hosts', 'Short-Term Rentals & Property Investing'],
+  ['financial_advisor', 'Financial Advising'],
+  ['insurance', 'Insurance'],
+  ['life_coach', 'Life & Business Coaching'],
+  ['fitness_coach', 'Fitness & Health Coaching'],
+  ['sales_coach', 'Sales Coaching & Training'],
+  ['career_coach', 'Career & Executive Coaching'],
+  ['marketing_consultant', 'Marketing Consulting'],
+  ['designer', 'Web & Graphic Design'],
+  ['photographer', 'Photography & Video'],
+  ['writer', 'Copywriting & Content'],
+  ['personal_trainer', 'Personal Training'],
+  ['medspa', 'Med Spa & Aesthetics'],
+  ['other', 'Other'],
+];
 
-const inputStyle = {
-  width: '100%', padding: '13px 16px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 12, color: '#F8F5EE',
-  fontFamily: 'DM Sans, sans-serif', fontSize: 15,
-  outline: 'none', appearance: 'none',
-};
+function IconLabel({ icon, children }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      <Icon name={icon} style={{ color: 'var(--site-coral)' }} />{children}
+    </span>
+  );
+}
+
+// Theme option for setup step 2: a mini page in the theme's own colors.
+function ThemeCard({ id, theme, checked, onSelect }) {
+  const p = theme.preview;
+  const dark = theme.mode === 'dark';
+  const bar = { height: 7, borderRadius: 4, background: p.surface, boxShadow: dark ? '0 0 0 1px rgba(255,255,255,0.08)' : '0 0 0 1px rgba(0,0,0,0.06)' };
+  return (
+    <label
+      htmlFor={`theme-${id}`}
+      className="site-theme-card"
+      style={{
+        position: 'relative', display: 'flex', flexDirection: 'column', gap: 12, padding: 12, borderRadius: 16,
+        background: 'var(--site-dark-2)', cursor: 'pointer',
+        boxShadow: checked ? 'inset 0 0 0 2px var(--site-coral)' : 'inset 0 0 0 1px rgba(255,255,255,0.10)',
+      }}
+    >
+      <input id={`theme-${id}`} type="radio" name="theme" checked={checked} onChange={() => onSelect(id)} style={{ position: 'absolute', opacity: 0, width: 1, height: 1 }} />
+      <div aria-hidden="true" style={{ height: 112, borderRadius: 10, background: p.bg, padding: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
+        <span style={{ width: 26, height: 26, borderRadius: '50%', background: p.accent }} />
+        <span style={{ ...bar, width: '60%' }} />
+        <span style={{ ...bar, width: '80%' }} />
+        <span style={{ marginTop: 'auto', width: '80%', height: 16, borderRadius: 9999, background: p.accent }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+          <span style={{ fontSize: 17, fontWeight: 700 }}>{theme.label}</span>
+          <span style={{ fontSize: 13, color: 'var(--site-on-dark-2)' }}>{dark ? 'Dark' : 'Light'} · {theme.description.toLowerCase()}</span>
+        </span>
+        {checked && (
+          <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--site-coral)', color: 'var(--site-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="check" size={15} strokeWidth={3} />
+          </span>
+        )}
+      </div>
+    </label>
+  );
+}
