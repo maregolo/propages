@@ -186,13 +186,18 @@ export default function Home() {
         <Container as="section" className={`${s.section} ${s.problem}`} aria-labelledby="problem-title">
           <Route d="M40 0 V8 H90 V100" className={s.route} />
           <ProblemMap className={`${s.map} ${s.problemMap}`} />
-          <span className={`${s.eyebrow} ${s.eyebrowCoral}`}>The Problem</span>
           <h2 id="problem-title" className={`site-h-section ${s.problemTitle}`}>
             The internet is the <span className={s.swipe}>greatest wealth-generating machine ever built.</span> You&apos;re not plugged into it.
           </h2>
-          <p className={s.problemBody}>
-            Creators have it. Online stores have it. Every brand on the internet has it — a way to capture leads, grow an audience, and make money while they sleep. You&apos;ve been doing it the hard way.
-          </p>
+          <div className={s.problemCopy}>
+            <p className={s.problemBody}>
+              Creators have it. Online stores have it. Every brand on the internet has it: a way to capture leads, grow an audience, and make money while they sleep. You&apos;ve been doing it the hard way.
+            </p>
+            <p className={s.problemBody}>
+              And the ground is moving under all of us. Your customers look you up before they open the door. AI now answers the questions you used to answer on the porch. Tools that took a team last year take an afternoon today. The reps who stake their claim online now will own their turf. The ones who wait will be explaining why nobody can find them.
+            </p>
+            <p className={`${s.problemBody} ${s.problemKicker}`}>The time to get out there is now.</p>
+          </div>
           <a href="#features" className={s.textLink}>One link changes that.</a>
         </Container>
 
