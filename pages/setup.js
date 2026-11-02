@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Logo from '../components/Logo';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
@@ -67,6 +67,7 @@ export default function Setup() {
   // Step 1 fields
   const [name,           setName]           = useState('');
   const [slug,           setSlug]           = useState('');
+  const claimedSlug = useRef(false);
   const [slugAvailable,  setSlugAvailable]  = useState(null);
   const [title,          setTitle]          = useState('');
   const [city,           setCity]           = useState('');
@@ -106,6 +107,19 @@ export default function Setup() {
         return;
       }
 
+      // Handle claimed on the homepage ("propages.com/[yourname]" field)
+      try {
+        const claimed = localStorage.getItem('pp_claim_handle');
+        if (claimed) {
+          const clean = generateSlug(claimed);
+          if (clean) {
+            claimedSlug.current = true;
+            setSlug(clean);
+            checkSlug(clean);
+          }
+        }
+      } catch (err) { /* storage unavailable */ }
+
       setLoading(false);
     });
   }, []);
@@ -121,6 +135,7 @@ export default function Setup() {
   function handleNameChange(e) {
     const val = e.target.value;
     setName(val);
+    if (claimedSlug.current) return; // keep the handle they claimed on the homepage
     const generated = generateSlug(val);
     setSlug(generated);
     if (generated) checkSlug(generated);
@@ -128,6 +143,7 @@ export default function Setup() {
 
   function handleSlugChange(e) {
     const val = generateSlug(e.target.value);
+    claimedSlug.current = true; // a hand-edited handle also stops name auto-fill
     setSlug(val);
     if (val) checkSlug(val);
   }
@@ -269,7 +285,10 @@ export default function Setup() {
     }
 
     // Clear referral ref now that it's been written
-    if (typeof window !== 'undefined') localStorage.removeItem('pp_referral_ref');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('pp_referral_ref');
+      localStorage.removeItem('pp_claim_handle');
+    }
 
     setSaving(false);
     setSavedSlug(slug);

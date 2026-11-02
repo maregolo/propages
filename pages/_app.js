@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import "@/styles/tokens.css";
+import "@/styles/site.css";
 import { outfit } from "@/lib/fonts";
 
 // Outfit is exposed as --font-outfit on :root (no wrapper element, so page

@@ -1,0 +1,130 @@
+/* ─── Shared marketing-site components ──────────────────────────────────────
+ *
+ * Used by components/site/* (SiteNav, SiteFooter, Button, Field, HandleField).
+ * Tokens live in styles/tokens.css. Imported once in pages/_app.js.
+ * Everything is scoped under .site-* class names so rep pages (--pp-* themes)
+ * are never affected.
+ */
+
+/* ── Page shell ────────────────────────────────────────────────────────────── */
+.site-page {
+  font-family: var(--site-font);
+  background: var(--site-page);
+  color: var(--site-ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Buttons: extra sizes + variants on top of .site-btn (tokens.css) ─────── */
+.site-btn--lg  { min-height: 60px; padding: 0 32px; font-size: 18.5px; }
+.site-btn--xl  { min-height: 60px; padding: 0 34px; font-size: 19.5px; }
+.site-btn--nav { min-height: 50px; padding: 0 24px; font-size: 16px; font-weight: 600; }
+.site-btn--light      { background: var(--site-on-dark); color: var(--site-ink); }
+.site-btn--ghost-dark { background: rgba(255,255,255,0.08); color: var(--site-on-dark); }
+.site-btn svg { flex-shrink: 0; }
+
+/* ── Field hint ── */
+.site-hint { margin: 6px 0 0; font-size: 14px; color: var(--site-muted); }
+
+/* ── Nav: floating pill over the dark hero ─────────────────────────────────
+ * The pill reaches 24px past the content column on each side (--site-hx),
+ * so the logo itself still lines up with every section's content edge. */
+.site-nav-wrap {
+  --site-hx: max(8px, calc(var(--site-gut) - 24px));
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  padding: 18px var(--site-hx) 0;
+}
+.site-nav {
+  max-width: calc(var(--site-wrap) + 2 * (var(--site-gut) - var(--site-hx)));
+  margin: 0 auto;
+  min-height: 68px;
+  padding: 8px 8px 8px calc(var(--site-gut) - var(--site-hx) - 1px);
+  border-radius: var(--site-r-pill);
+  background: var(--site-dark-2);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  color: var(--site-on-dark);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.site-nav__logo { display: inline-flex; align-items: center; height: 28px; text-decoration: none; }
+.site-nav__logo:focus-visible { outline: 2px solid var(--site-mint); outline-offset: 6px; border-radius: 4px; }
+.site-nav__links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.site-nav__link {
+  color: var(--site-on-dark);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 14px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--site-r-pill);
+}
+a.site-nav__link:hover { color: #FFFFFF; background: rgba(255,255,255,0.06); }
+a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-offset: -2px; }
+.site-nav__soon { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--site-coral); }
+.site-nav__actions { display: flex; align-items: center; gap: 8px; }
+
+@media (max-width: 760px) {
+  .site-nav__links, .site-nav__login { display: none !important; }
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+.site-footer { background: var(--site-dark); color: var(--site-on-dark); }
+.site-footer__inner {
+  padding-block: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.site-footer__brand { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.site-footer__tag  { font-size: 16px; color: var(--site-on-dark-2); }
+.site-footer__copy { font-size: 15px; color: var(--site-on-dark-2); }
+.site-footer__links { display: flex; gap: 20px; font-size: 15px; }
+.site-footer__links a { color: var(--site-on-dark-2); text-decoration: none; }
+.site-footer__links a:hover { color: var(--site-on-dark); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Handle field: "propages.com/" + input, fused into one white pill ─────── */
+.site-claim { display: flex; flex-wrap: wrap; gap: 12px; max-width: 560px; }
+.site-claim__field {
+  flex: 1 1 280px;
+  min-width: 0;
+  height: 60px;
+  border-radius: var(--site-r-pill);
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  cursor: text;
+}
+.site-claim__field:focus-within { box-shadow: 0 0 0 2px var(--site-dark), 0 0 0 4px var(--site-mint); }
+.site-claim--on-light .site-claim__field { box-shadow: inset 0 0 0 1px #868685; }
+.site-claim--on-light .site-claim__field:focus-within { box-shadow: inset 0 0 0 1px #868685, var(--site-focus); }
+.site-claim__prefix { font-size: 18.5px; font-weight: 500; color: var(--site-muted); white-space: nowrap; }
+.site-claim__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 18.5px;
+  font-weight: 600;
+  color: var(--site-ink);
+  padding: 0 0 0 1px;
+}
+.site-claim__input::placeholder { color: var(--site-muted); font-weight: 500; }
+.site-claim .site-btn { flex: 0 0 auto; }
+@media (max-width: 480px) {
+  .site-claim .site-btn { flex: 1 1 100%; }
+}

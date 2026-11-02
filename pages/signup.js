@@ -31,6 +31,9 @@ export default function Signup() {
 
     // Check for referral param
     const params = new URLSearchParams(window.location.search);
+    // Homepage "Claim my page" form passes the email along
+    const prefillEmail = params.get('email');
+    if (prefillEmail) setEmail(prefillEmail);
     const ref = params.get('ref');
     if (ref) {
       supabase
