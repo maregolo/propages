@@ -142,6 +142,8 @@
 }
 .swipe { background: linear-gradient(transparent 58%, var(--h-swipe) 58%); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .problemBody { margin: 0; font-size: 21.5px; line-height: 1.6; color: var(--site-ink-2); max-width: 640px; }
+.problemCopy { display: flex; flex-direction: column; gap: 20px; }
+.problemKicker { font-weight: 600; color: var(--site-ink); }
 .textLink { align-self: flex-start; font-size: 19.5px; font-weight: 600; color: var(--site-ink); text-decoration: underline; text-underline-offset: 4px; }
 .textLink:hover { color: var(--site-ink-2); }
 
