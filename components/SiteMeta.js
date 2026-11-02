@@ -4,7 +4,7 @@ import Head from 'next/head';
 
 // Production only lives at propages.vercel.app until DNS is set up; set
 // NEXT_PUBLIC_SITE_URL in Vercel once propages.pro / propages.com point here.
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://propages.vercel.app';
+export const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://propages.vercel.app';
 
 export default function SiteMeta({
   title = 'ProPages — the link-in-bio built for sales reps',
