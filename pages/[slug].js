@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { SITE_URL, DOMAIN } from '../lib/site';
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { getTheme, DEFAULT_THEME } from '../lib/themes';
@@ -2083,8 +2084,8 @@ function QRSection() {
 
 function ShareCard({ slug, isOwner }) {
   const [copied, setCopied] = useState(false);
-  const fullUrl    = `https://propages.com/${slug}`;
-  const displayUrl = `propages.com/${slug}`;
+  const fullUrl    = `${SITE_URL}/${slug}`;
+  const displayUrl = `${DOMAIN}/${slug}`;
 
   function handleCopy() {
     navigator.clipboard.writeText(fullUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
@@ -2139,8 +2140,8 @@ function WelcomeBanner({ slug, onDismiss }) {
 
 function LiveToast({ slug, visible, onDismiss }) {
   const [copied, setCopied] = useState(false);
-  const fullUrl    = `https://propages.com/${slug}`;
-  const displayUrl = `propages.com/${slug}`;
+  const fullUrl    = `${SITE_URL}/${slug}`;
+  const displayUrl = `${DOMAIN}/${slug}`;
 
   if (!visible) return null;
 

@@ -245,7 +245,7 @@ export default function CoachesLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit" style={{ background: '#00E5BE' }}>See My Approach</div>
-            <div className="phone-url">propages.com/marcus-bell</div>
+            <div className="phone-url">propages.pro/marcus-bell</div>
           </div>
 
           <div className="phone phone-front">
@@ -262,7 +262,7 @@ export default function CoachesLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit">Book a Free Discovery Call</div>
-            <div className="phone-url">propages.com/dana-ruiz</div>
+            <div className="phone-url">propages.pro/dana-ruiz</div>
           </div>
         </div>
       </div>

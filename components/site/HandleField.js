@@ -1,4 +1,4 @@
-// "propages.com/[yourname]" + button, fused. Submitting stores the handle for
+// "propages.pro/[yourname]" + button, fused. Submitting stores the handle for
 // setup step 1 (localStorage `pp_claim_handle`) and sends the visitor to
 // /signup. Optional `email` field is passed along as ?email=.
 import { useId, useState } from 'react';
@@ -6,7 +6,9 @@ import { useRouter } from 'next/router';
 import Button from './Button';
 
 export const CLAIM_KEY = 'pp_claim_handle';
-export const DOMAIN = 'propages.com';
+import { DOMAIN } from '../../lib/site';
+
+export { DOMAIN };
 
 export function cleanHandle(val) {
   return (val || '')

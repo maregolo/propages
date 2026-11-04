@@ -146,7 +146,7 @@ export default function Setup() {
         return;
       }
 
-      // Handle claimed on the homepage ("propages.com/[yourname]" field)
+      // Handle claimed on the homepage ("propages.pro/[yourname]" field)
       try {
         const claimed = localStorage.getItem('pp_claim_handle');
         if (claimed) {
