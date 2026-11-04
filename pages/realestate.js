@@ -315,7 +315,7 @@ export default function RealEstateLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit" style={{ background: '#00E5BE' }}>See Active Listings</div>
-            <div className="phone-url">propages.com/marcus-diaz</div>
+            <div className="phone-url">propages.pro/marcus-diaz</div>
           </div>
 
           <div className="phone phone-front">
@@ -332,7 +332,7 @@ export default function RealEstateLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit">Get My Free Home Valuation</div>
-            <div className="phone-url">propages.com/sarah-chen</div>
+            <div className="phone-url">propages.pro/sarah-chen</div>
           </div>
         </div>
       </div>

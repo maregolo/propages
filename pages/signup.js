@@ -6,6 +6,7 @@ import AppShell, { Intro, Alert } from '../components/site/AppShell';
 import Button from '../components/site/Button';
 import Field from '../components/site/Field';
 import Icon from '../components/site/icons';
+import { SITE_URL } from '../lib/site';
 
 export default function Signup() {
   const router = useRouter();
@@ -149,7 +150,7 @@ export default function Signup() {
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
-      { redirectTo: 'https://propages.vercel.app/reset' }
+      { redirectTo: `${SITE_URL}/reset` }
     );
 
     setLoading(false);
