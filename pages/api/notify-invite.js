@@ -2,6 +2,9 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Form input goes into the email as text, never as HTML.
+const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -13,10 +16,10 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: 'ProPages <onboarding@resend.dev>',
       to: 'marcusregolo@gmail.com',
-      subject: `New invite request — ${name}`,
+      subject: `New invite request — ${String(name).slice(0, 80)}`,
       html: `
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Name:</strong> ${esc(name)}</p>
+        <p><strong>Email:</strong> ${esc(email)}</p>
         <p>Log in to Supabase to approve or reject this request.</p>
       `,
     });
