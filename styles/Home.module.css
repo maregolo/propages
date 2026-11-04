@@ -262,35 +262,33 @@
 .claimNote { margin: 0; font-size: 15px; color: var(--site-muted); text-align: center; }
 .claimNote a { color: var(--site-ink); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ── First screen fits the window (laptops and up) ─────────────────────────
- * Nav + hero + proof bar fill one screen: the dark block is at least the
- * window height (capped at the board's 846px hero + proof bar), the hero
- * takes the space the proof bar leaves, and the hero's spacing, headline and
- * lede shrink with window height so the CTA never drops below the fold.
+/* ── First screen (laptops and up) ─────────────────────────────────────────
+ * The hero fills the window except for a sliver at the bottom, where the
+ * top ~10% of the mint proof bar peeks in as a "keep scrolling" cue. On tall
+ * screens the hero stops at 1000px. The hero's spacing, headline
+ * and lede shrink with window height so the CTA never drops below the fold.
  * Phones stack the hero instead (see the max-width: 760px block). */
 @media (min-width: 761px) {
-  .dark { display: flex; flex-direction: column; min-height: min(100vh, 962px); min-height: min(100svh, 962px); }
-  .hero { flex: 1 0 auto; min-height: 0; width: 100%; }
+  .page { --peek: 12px; }
+  .hero { min-height: min(calc(100vh - var(--peek)), 1000px); min-height: min(calc(100svh - var(--peek)), 1000px); }
   .heroCopy {
-    padding: clamp(100px, 16svh, 176px) 56px clamp(16px, 4svh, 88px) 0;
-    gap: clamp(12px, 3svh, 32px);
+    padding: clamp(112px, 19svh, 176px) 56px clamp(24px, 5.5svh, 88px) 0;
+    gap: clamp(14px, 3.4svh, 32px);
   }
-  .heroCopy :global(.site-h-hero) { font-size: min(clamp(46px, calc(var(--site-cw) * 0.06953), 100.1px), 9.2svh); }
-  .heroSub { font-size: clamp(17px, 2.35svh, 22.5px); }
+  .heroCopy :global(.site-h-hero) { font-size: min(clamp(46px, calc(var(--site-cw) * 0.06953), 100.1px), 10.2svh); }
+  .heroSub { font-size: clamp(17.5px, 2.5svh, 22.5px); }
   .heroVisual { min-height: 0; }
-  .proofInner { padding-block: clamp(14px, 3svh, 36px); }
-  .proofNum { font-size: clamp(34px, 4.8svh, 43px); }
   /* Center the phone mockups in the space under the nav pill */
   .phone { top: calc(50% + 43px); }
 }
 /* Shorter windows: scale the phone mockups down so they don't run under the nav */
-@media (min-width: 761px) and (max-height: 780px) {
+@media (min-width: 761px) and (max-height: 720px) {
   .phoneDark  { transform: translate(-130%, -50%) rotate(-8deg) scale(1.3); }
   .phoneLight { transform: translate(-190%, -50%) rotate(-20deg) scale(1.3); }
 }
-@media (min-width: 761px) and (max-height: 660px) {
-  .phoneDark  { transform: translate(-130%, -50%) rotate(-8deg) scale(1.12); }
-  .phoneLight { transform: translate(-190%, -50%) rotate(-20deg) scale(1.12); }
+@media (min-width: 761px) and (max-height: 620px) {
+  .phoneDark  { transform: translate(-130%, -50%) rotate(-8deg) scale(1.15); }
+  .phoneLight { transform: translate(-190%, -50%) rotate(-20deg) scale(1.15); }
 }
 
 /* ── Phones (under 760px) ──────────────────────────────────────────────── */
