@@ -72,6 +72,23 @@ a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-of
 .site-nav__soon { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--site-coral); }
 .site-nav__actions { display: flex; align-items: center; gap: 8px; }
 
+/* White pill (default): crisp on the dark hero */
+.site-nav--light {
+  background: #FFFFFF;
+  border-color: rgba(0,0,0,0.04);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  color: var(--site-ink);
+}
+.site-nav--light .site-nav__link { color: var(--site-ink); }
+.site-nav--light a.site-nav__link:hover { color: var(--site-ink); background: var(--site-tint); }
+.site-nav--light a.site-nav__link:focus-visible,
+.site-nav--light .site-nav__logo:focus-visible { outline-color: var(--site-mint-ink); }
+.site-nav--light .site-nav__soon { color: var(--site-coral-ink); }
+.site-nav--light .site-btn--ghost-dark { background: var(--site-tint); color: var(--site-ink); }
+.site-nav--light .site-btn--ghost-dark:hover { background: #E4E9EE; }
+.site-nav--light .site-btn--light { background: var(--site-dark); color: var(--site-on-dark); }
+.site-nav--light .site-btn:focus-visible { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--site-mint-ink); }
+
 @media (max-width: 760px) {
   .site-nav__links, .site-nav__login { display: none !important; }
 }

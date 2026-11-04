@@ -3,6 +3,7 @@
 //
 //   <SiteNav />                                   homepage (links + log in + CTA)
 //   <SiteNav links={[]} login={false} />          ad landing pages: logo + CTA only
+//   <SiteNav tone="dark" />                        tonal slate pill (the board's original)
 import Link from 'next/link';
 import Logo from '../Logo';
 import Button from './Button';
@@ -18,12 +19,14 @@ export default function SiteNav({
   links = DEFAULT_LINKS,
   login = true,
   cta = { label: 'Get started', href: '/signup' },
+  tone = 'light',
 }) {
+  const light = tone === 'light';
   return (
     <header className="site-nav-wrap">
-      <nav className="site-nav" aria-label="Main">
+      <nav className={`site-nav ${light ? 'site-nav--light' : ''}`} aria-label="Main">
         <Link href="/" className="site-nav__logo" aria-label="ProPages home">
-          <Logo height={28} title="ProPages" />
+          <Logo height={28} tone={light ? 'light' : 'dark'} title="ProPages" />
         </Link>
         {links.length > 0 && (
           <div className="site-nav__links">
