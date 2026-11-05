@@ -46,15 +46,26 @@
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow: 0 10px 30px rgba(0,0,0,0.28);
   color: var(--site-on-dark);
-  display: flex;
-  flex-wrap: wrap;
+  /* Three columns: logo | links | actions. The two outer columns share the
+     leftover space equally, so the links sit at the true center of the pill. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
 }
-.site-nav__logo { display: inline-flex; align-items: center; height: 28px; text-decoration: none; }
+.site-nav__logo { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; }
+.site-nav--light .site-nav__logo svg { height: 40px; width: auto; }
 .site-nav__logo:focus-visible { outline: 2px solid var(--site-mint); outline-offset: 6px; border-radius: 4px; }
-.site-nav__links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.site-nav__links {
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* The pill's left padding is wider than its 8px right padding; shift by half
+     the difference so the links are centered on the pill, not its content box. */
+  position: relative;
+  left: calc((var(--site-gut) - var(--site-hx) - 9px) / -2);
+}
 .site-nav__link {
   color: var(--site-on-dark);
   text-decoration: none;
@@ -70,7 +81,7 @@
 a.site-nav__link:hover { color: #FFFFFF; background: rgba(255,255,255,0.06); }
 a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-offset: -2px; }
 .site-nav__soon { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--site-coral); }
-.site-nav__actions { display: flex; align-items: center; gap: 8px; }
+.site-nav__actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
 
 /* White pill (default): crisp on the dark hero */
 .site-nav--light {
@@ -89,8 +100,15 @@ a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-of
 .site-nav--light .site-btn--light { background: var(--site-dark); color: var(--site-on-dark); }
 .site-nav--light .site-btn:focus-visible { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--site-mint-ink); }
 
+/* Not enough room to center the links between logo and buttons: drop them
+   (tablets keep Log in; phones show logo + Get started only). */
+@media (max-width: 1100px) {
+  .site-nav__links { display: none !important; }
+  .site-nav { grid-template-columns: minmax(0, 1fr) auto; }
+}
 @media (max-width: 760px) {
-  .site-nav__links, .site-nav__login { display: none !important; }
+  .site-nav__login { display: none !important; }
+  .site-nav--light .site-nav__logo svg { height: 34px; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────────── */
