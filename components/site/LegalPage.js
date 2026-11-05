@@ -5,9 +5,9 @@ import Icon from './icons';
 
 // ── Fill these in before publishing (see the PR) ──────────────────────────
 export const LEGAL = {
-  effective: 'November 4, 2026',
+  effective: 'November 5, 2026',
   contactEmail: 'support@propages.pro',   // must be a mailbox you actually read
-  governingState: '[STATE]',              // the state whose law governs the Terms
+  governingState: 'Rhode Island',            // the state whose law governs the Terms
   minimumAge: 18,
 };
 
