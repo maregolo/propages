@@ -54,7 +54,20 @@
   gap: 12px;
 }
 .site-nav__logo { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; }
-.site-nav--light .site-nav__logo svg { height: 40px; width: auto; }
+/* White nav: logo on a navy pill. The nav's inner radius is 33px (34 minus its
+   1px border); inset 8px on all three sides like the buttons, the tile is 50px
+   tall with a 25px radius, so its curve is concentric with the nav's and it
+   matches the "Get started" button's height. */
+.site-nav--light { padding-left: 8px; }
+.site-nav__tile {
+  display: inline-flex;
+  align-items: center;
+  height: 50px;
+  padding: 0 22px;
+  border-radius: 25px;
+  background: var(--site-nav-tile, #0D1438);
+  overflow: hidden;   /* keep the glow inside the pill */
+}
 .site-nav__logo:focus-visible { outline: 2px solid var(--site-mint); outline-offset: 6px; border-radius: 4px; }
 .site-nav__links {
   justify-self: center;
@@ -66,6 +79,7 @@
   position: relative;
   left: calc((var(--site-gut) - var(--site-hx) - 9px) / -2);
 }
+.site-nav--light .site-nav__links { left: 0; }  /* padding is symmetric (8px) */
 .site-nav__link {
   color: var(--site-on-dark);
   text-decoration: none;
@@ -108,7 +122,7 @@ a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-of
 }
 @media (max-width: 760px) {
   .site-nav__login { display: none !important; }
-  .site-nav--light .site-nav__logo svg { height: 34px; }
+  .site-nav__tile { padding: 0 18px; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────────── */

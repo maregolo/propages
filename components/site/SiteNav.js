@@ -26,7 +26,12 @@ export default function SiteNav({
     <header className="site-nav-wrap">
       <nav className={`site-nav ${light ? 'site-nav--light' : ''}`} aria-label="Main">
         <Link href="/" className="site-nav__logo" aria-label="ProPages home">
-          <Logo height={light ? 40 : 28} tone={light ? 'light' : 'dark'} title="ProPages" />
+          {light ? (
+            // White nav: the glow logo sits on a navy pill, concentric with the nav.
+            <span className="site-nav__tile"><Logo height={28} title="ProPages" /></span>
+          ) : (
+            <Logo height={28} title="ProPages" />
+          )}
         </Link>
         {links.length > 0 && (
           <div className="site-nav__links">
