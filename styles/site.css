@@ -54,7 +54,7 @@
   gap: 12px;
 }
 .site-nav__logo { justify-self: start; display: inline-flex; align-items: center; text-decoration: none; }
-/* White nav: logo on a navy pill. The nav's inner radius is 33px (34 minus its
+/* White nav: logo on a slate pill (the same color as "Get started"). The nav's inner radius is 33px (34 minus its
    1px border); inset 8px on all three sides like the buttons, the tile is 50px
    tall with a 25px radius, so its curve is concentric with the nav's and it
    matches the "Get started" button's height. */
@@ -63,9 +63,9 @@
   display: inline-flex;
   align-items: center;
   height: 50px;
-  padding: 0 22px;
+  padding: 0 20px;
   border-radius: 25px;
-  background: var(--site-nav-tile, #0D1438);
+  background: var(--site-dark);
   overflow: hidden;   /* keep the glow inside the pill */
 }
 .site-nav__logo:focus-visible { outline: 2px solid var(--site-mint); outline-offset: 6px; border-radius: 4px; }

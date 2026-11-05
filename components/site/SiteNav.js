@@ -27,8 +27,8 @@ export default function SiteNav({
       <nav className={`site-nav ${light ? 'site-nav--light' : ''}`} aria-label="Main">
         <Link href="/" className="site-nav__logo" aria-label="ProPages home">
           {light ? (
-            // White nav: the glow logo sits on a navy pill, concentric with the nav.
-            <span className="site-nav__tile"><Logo height={28} title="ProPages" /></span>
+            // White nav: the glow logo sits on a slate pill (same as "Get started"), concentric with the nav.
+            <span className="site-nav__tile"><Logo height={34} title="ProPages" /></span>
           ) : (
             <Logo height={28} title="ProPages" />
           )}
