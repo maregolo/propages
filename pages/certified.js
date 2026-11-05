@@ -160,7 +160,7 @@ export default function Certified() {
         <div className="disclaimer-section">
           <div className="disclaimer-label">Important Disclaimer</div>
           <div className="disclaimer-text">
-            ProPages badges confirm identity and company affiliation only. They do not constitute an endorsement of a representative's services, guarantee their licensing or certifications, or verify the accuracy of any claims made on their page. ProPages is not responsible for the conduct of any representative before, during, or after an interaction with a homeowner. Always exercise your own judgment. If you have a concern about a representative, contact us at support@propages.com.
+            ProPages badges confirm identity and company affiliation only. They do not constitute an endorsement of a representative's services, guarantee their licensing or certifications, or verify the accuracy of any claims made on their page. ProPages is not responsible for the conduct of any representative before, during, or after an interaction with a homeowner. Always exercise your own judgment. If you have a concern about a representative, contact us at support@propages.pro.
           </div>
         </div>
 

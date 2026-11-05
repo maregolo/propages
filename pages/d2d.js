@@ -542,7 +542,7 @@ export default function D2DLanding() {
           </p>
 
           <div className="claim-row">
-            <span className="claim-prefix">propages.com/</span>
+            <span className="claim-prefix">propages.pro/</span>
             <input
               className="claim-input"
               placeholder="yourname"
@@ -591,7 +591,7 @@ export default function D2DLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit" style={{ background: '#00E5BE' }}>Get a Free Inspection</div>
-            <div className="phone-url">propages.com/sara-mitchell</div>
+            <div className="phone-url">propages.pro/sara-mitchell</div>
           </div>
 
           {/* Front phone — Jake */}
@@ -612,7 +612,7 @@ export default function D2DLanding() {
             <div className="phone-field">Your name</div>
             <div className="phone-field">Phone number</div>
             <div className="phone-submit">Get My Free Estimate</div>
-            <div className="phone-url">propages.com/jake-rivera</div>
+            <div className="phone-url">propages.pro/jake-rivera</div>
           </div>
 
         </div>
