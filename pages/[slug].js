@@ -20,7 +20,7 @@ import { supabase } from '../lib/supabase';
 import { getTheme, themeToCSS, DEFAULT_THEME, THEMES } from '../lib/themes';
 import { SITE_URL } from '../lib/site';
 import { getDefaults } from '../lib/repDefaults';
-import { normalizeBlocks } from '../lib/repBlocks';
+import { normalizeBlocks, cleanLinks } from '../lib/repBlocks';
 import { renderBlock, RepFooter } from '../components/rep/blocks';
 import { renderEditor } from '../components/rep/editors';
 import { OwnerBar, BlockBar, AddBlock, LiveToast, WelcomeBanner, BLOCK_LABELS } from '../components/rep/owner';
@@ -150,7 +150,9 @@ function BlockPage({ initialRep }) {
     openEditor(block.id);
   }
 
-  const ctx = { rep, defaults, isOwner, editMode: isOwner && editMode, hasForm };
+  // The rep's own profile links (Links block) power the message-me buttons.
+  const profileLinks = cleanLinks(blocks.find(b => b.type === 'links' && b.visible !== false)?.data?.links);
+  const ctx = { rep, defaults, isOwner, editMode: isOwner && editMode, hasForm, profileLinks };
   const editing = isOwner && editMode;
 
   return (
@@ -200,7 +202,7 @@ function BlockPage({ initialRep }) {
                 />
                 {isEditingThis
                   ? renderEditor(block, {
-                      rep, defaults,
+                      rep, defaults, profileLinks,
                       onSave: (data) => { update(block.id, { data }); closeEditor(block.id); },
                       onCancel: () => closeEditor(block.id),
                       onRepPatch: (patch) => setRep(r => ({ ...r, ...patch })),

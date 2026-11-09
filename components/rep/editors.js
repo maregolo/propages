@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import RepIcon, { LINK_ICON_CHOICES, linkIconName } from './RepIcon';
 import { formConfig } from './blocks';
 import { cleanLinks, cleanStats, cleanTestimonials, normalizeUrl } from '../../lib/repBlocks';
+import { CONTACT_METHODS, digits, messageSources } from '../../lib/contact';
 
 function Shell({ title, note, error, saving, onSave, onCancel, children }) {
   return (
@@ -211,7 +212,7 @@ export function LinksEditor({ block, defaults, onSave, onCancel }) {
 
 // ── Lead form ────────────────────────────────────────────────────────────────
 
-export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel }) {
+export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel, profileLinks }) {
   const d = block.data || {};
   const lc = d.lead_capture || rep.lead_capture || {};
   const cfg = formConfig(block, rep, defaults);
@@ -227,13 +228,23 @@ export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel }) {
   const [button, setButton] = useState(cfg.button);
   const [collectEmail, setCollectEmail] = useState(cfg.collectEmail);
   const [collectZip, setCollectZip] = useState(cfg.collectZip);
+  const [methods, setMethods] = useState(cfg.methods);
+  const [msgIg, setMsgIg] = useState(!!cfg.message.instagram);
+  const [msgFb, setMsgFb] = useState(!!cfg.message.facebook);
+  const [msgWa, setMsgWa] = useState(cfg.message.whatsapp || '');
+  const [msgText, setMsgText] = useState(cfg.message.text || '');
   const [error, setError] = useState('');
+  const sources = messageSources(profileLinks);
+  const toggleMethod = (key, on) => setMethods(prev => (on ? [...new Set([...prev, key])] : prev.filter(k => k !== key)));
 
   function handleSave() {
     setError('');
     if (!trim(headline) || !trim(button)) { setError('The form needs a headline and button text.'); return; }
     const opts = options.map(trim).filter(Boolean);
     if (trim(question) && opts.length < 2) { setError('Give the question at least two answers, or clear the question.'); return; }
+    for (const [label, num] of [['WhatsApp', msgWa], ['texting', msgText]]) {
+      if (trim(num) && digits(num).length < 10) { setError(`The ${label} number needs at least 10 digits.`); return; }
+    }
     onSave({
       ...d,
       lead_capture: {
@@ -245,13 +256,15 @@ export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel }) {
           qualifying_options: trim(question) ? opts : [],
           button_text: trim(button),
           collect_email: collectEmail, collect_zip: collectZip,
+          contact_methods: ['phone', ...Object.keys(CONTACT_METHODS).filter(k => k !== 'phone' && methods.includes(k))],
+          message_buttons: { instagram: msgIg, facebook: msgFb, whatsapp: trim(msgWa), text: trim(msgText) },
         },
       },
     });
   }
 
   return (
-    <Shell title="Lead form" note="Name and phone are always asked. New leads land on your dashboard and in your email."
+    <Shell title="Lead form" note="New leads land on your dashboard and in your email."
       error={error} onSave={handleSave} onCancel={onCancel}>
       <Field label="Small label above the headline"><input className="ow-input" value={label} onChange={e => setLabel(e.target.value)} /></Field>
       <Field label="Headline"><input className="ow-input" value={headline} onChange={e => setHeadline(e.target.value)} /></Field>
@@ -270,6 +283,34 @@ export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel }) {
         )}
       </div>
       <Field label="Button"><input className="ow-input" value={button} onChange={e => setButton(e.target.value)} /></Field>
+      <div className="ow-group">
+        <span className="ow-group-title">How visitors can reach you</span>
+        <span className="ow-hint">They pick one and leave the matching detail. You reach out from your own phone or app.</span>
+        {Object.entries(CONTACT_METHODS).map(([key, m]) => (
+          <label className="ow-check" key={key}>
+            <input type="checkbox" checked={key === 'phone' || methods.includes(key)} disabled={key === 'phone'} onChange={e => toggleMethod(key, e.target.checked)} />
+            {m.label}{key === 'phone' && <span className="ow-hint" style={{ marginLeft: 4 }}>always on</span>}
+          </label>
+        ))}
+      </div>
+      <div className="ow-group">
+        <span className="ow-group-title">Message buttons</span>
+        <span className="ow-hint">Buttons under the form that open a chat with you in the visitor&apos;s own app. Each tap is counted on your dashboard.</span>
+        <label className="ow-check">
+          <input type="checkbox" checked={msgIg} onChange={e => setMsgIg(e.target.checked)} />
+          Instagram {sources.instagram ? <span className="ow-hint">@{sources.instagram}</span> : <span className="ow-hint">add your Instagram to Links first</span>}
+        </label>
+        <label className="ow-check">
+          <input type="checkbox" checked={msgFb} onChange={e => setMsgFb(e.target.checked)} />
+          Messenger {sources.facebook ? <span className="ow-hint">facebook.com/{sources.facebook}</span> : <span className="ow-hint">add your Facebook to Links first</span>}
+        </label>
+        <Field label="WhatsApp number" optional hint="Shows a WhatsApp button. Visitors will see this number.">
+          <input className="ow-input" type="tel" inputMode="tel" value={msgWa} onChange={e => setMsgWa(e.target.value)} placeholder="(555) 555-0100" />
+        </Field>
+        <Field label="Number for texts" optional hint="Shows a Send a text button. Visitors will see this number.">
+          <input className="ow-input" type="tel" inputMode="tel" value={msgText} onChange={e => setMsgText(e.target.value)} placeholder="(555) 555-0100" />
+        </Field>
+      </div>
       <div className="ow-group">
         <span className="ow-group-title">Also ask for</span>
         <label className="ow-check"><input type="checkbox" checked={collectEmail} onChange={e => setCollectEmail(e.target.checked)} />Email address</label>

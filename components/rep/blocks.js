@@ -10,7 +10,8 @@ import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import Logo from '../Logo';
 import RepIcon, { BrandIcon, linkIconName } from './RepIcon';
-import { BRAND_LABELS } from './brandPaths';
+import { BRAND_LABELS, BRAND_PATHS } from './brandPaths';
+import { CONTACT_METHODS, SUGGESTED_METHODS, cleanHandle, validateContact, messageButtons } from '../../lib/contact';
 import {
   cleanLinks, cleanStats, cleanTestimonials, firstName, initialsOf,
   isSocialProfile, socialPlatform,
@@ -200,6 +201,8 @@ export function formConfig(block, rep, defaults) {
   const lc = block.data?.lead_capture || rep.lead_capture || {};
   const f = lc.form || {};
   const df = defaults.form;
+  const methods = (Array.isArray(f.contact_methods) ? f.contact_methods : SUGGESTED_METHODS)
+    .filter(m => CONTACT_METHODS[m] && m !== 'phone');
   return {
     label: f.label || df.label,
     headline: f.headline || df.headline,
@@ -211,13 +214,19 @@ export function formConfig(block, rep, defaults) {
     phonePlaceholder: f.phone_placeholder || '(555) 555-0100',
     collectEmail: !!f.collect_email,
     collectZip: !!f.collect_zip,
+    // Call/text is always offered, and always first.
+    methods: ['phone', ...methods],
+    // Instagram/Messenger buttons appear only if the rep's links include that profile.
+    message: f.message_buttons || { instagram: true, facebook: true },
   };
 }
 
-export function LeadCaptureBlock({ block, rep, defaults, isOwner, editMode }) {
+export function LeadCaptureBlock({ block, rep, defaults, isOwner, editMode, profileLinks }) {
   const cfg = formConfig(block, rep, defaults);
   const sectionRef = useRef(null);
   const logged = useRef(false);
+  const who = firstName(rep.name);
+  const buttons = messageButtons(cfg.message, profileLinks, `Hi ${who || 'there'}, I found you on ProPages and I'd like to learn more.`);
 
   useEffect(() => {
     if (isOwner || !sectionRef.current) return;
@@ -240,56 +249,121 @@ export function LeadCaptureBlock({ block, rep, defaults, isOwner, editMode }) {
         {cfg.sub && <p className="rp-form-sub">{cfg.sub}</p>}
       </div>
       <LeadForm repId={rep.id} repName={rep.name} cfg={cfg} formId={block.id} preview={editMode} />
+      {buttons.length > 0 && (
+        <div className="rp-dm" role="group" aria-labelledby={`dm-h-${block.id}`}>
+          <span className="rp-dm-head" id={`dm-h-${block.id}`}>Rather message {who || 'them'} directly?</span>
+          {buttons.map(b => (
+            <a key={b.channel} href={b.href} className="rp-dm-btn" target="_blank" rel="noopener"
+              onClick={() => { if (!isOwner) logBlockEvent(rep.id, block.id, 'lead_capture', 'dm_click', b.channel); }}>
+              <span className="rp-dm-icon" aria-hidden="true">{b.channel === 'text' ? <RepIcon name="chat" size={20} /> : <BrandIcon platform={b.channel} size={20} />}</span>
+              <span className="rp-dm-label">{b.label}</span>
+              <RepIcon name="external" size={16} />
+            </a>
+          ))}
+        </div>
+      )}
     </section>
+  );
+}
+
+function MethodIcon({ method }) {
+  const icon = CONTACT_METHODS[method]?.icon;
+  return BRAND_PATHS[icon] ? <BrandIcon platform={icon} size={20} /> : <RepIcon name={icon} size={20} />;
+}
+
+// Consent line matched to the channel the visitor picked. Calls and texts get
+// the full TCPA disclosure; messaging apps and email get a plain one.
+function Consent({ method, button, repName }) {
+  const name = repName || 'this professional';
+  const privacy = <>See our <Link href="/privacy">Privacy Policy</Link>.</>;
+  if (method === 'phone') {
+    return (
+      <p className="rp-tcpa">
+        By tapping &ldquo;{button}&rdquo;, you agree that {name} may call or text you at the number above about your request,
+        including by automated means. Consent isn&apos;t a condition of any purchase. Msg &amp; data rates may apply; reply STOP
+        to opt out. {privacy}
+      </p>
+    );
+  }
+  const where = method === 'email' ? 'email you' : `message you on ${CONTACT_METHODS[method].label}`;
+  return (
+    <p className="rp-tcpa">
+      By tapping &ldquo;{button}&rdquo;, you agree that {name} may {where} about your request.
+      {method === 'whatsapp' && ' Msg & data rates may apply.'} {privacy}
+    </p>
   );
 }
 
 function LeadForm({ repId, repName, cfg, formId, preview }) {
   const [answer, setAnswer] = useState('');
+  const [method, setMethod] = useState('phone');
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [zip, setZip] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const who = firstName(repName) || 'They';
+  const m = CONTACT_METHODS[method];
+  const askEmailToo = cfg.collectEmail && method !== 'email';
+
+  function pick(next) {
+    setMethod(next);
+    setContact('');
+    setError('');
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (preview) return;
-    if (!name.trim()) { setError('Please add your name.'); return; }
-    if (phone.replace(/\D/g, '').length < 7) { setError('Please add a phone number we can reach you at.'); return; }
-    if (cfg.collectEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Please add a valid email address.'); return; }
-    if (cfg.collectZip && !zip.trim()) { setError('Please add your zip code.'); return; }
+    if (!name.trim()) { setError('Add your name.'); return; }
+    const problem = validateContact(method, contact);
+    if (problem) { setError(problem); return; }
+    if (askEmailToo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError('Add a valid email address.'); return; }
+    if (cfg.collectZip && !zip.trim()) { setError('Add your zip code.'); return; }
     setError('');
     setSending(true);
-    const payload = {
+
+    const handle = cleanHandle(method, contact);
+    const base = {
       rep_id: repId,
       name: name.trim(),
-      phone: phone.trim(),
-      // Same format the dashboard and lead email already read.
-      notes: answer ? `Home ownership: ${answer}` : null,
-      ...(cfg.collectEmail && { email: email.trim() }),
+      notes: answer ? `${cfg.question ? `${cfg.question} ` : ''}${answer}` : null,
+      ...((method === 'phone' || method === 'whatsapp') && { phone: contact.trim() }),
+      ...(method === 'email' && { email: handle }),
+      ...(askEmailToo && { email: email.trim() }),
       ...(cfg.collectZip && { zip: zip.trim() }),
     };
-    const { error: dbError } = await supabase.from('leads').insert([payload]);
+    const extra = method === 'phone' ? {} : { contact_method: method, contact_handle: handle };
+    let { error: dbError } = await supabase.from('leads').insert([{ ...base, ...extra }]);
+    // Until the contact_method / contact_handle columns exist, keep the
+    // preference in notes rather than losing the lead.
+    if (dbError && method !== 'phone' && /contact_(method|handle)/.test(dbError.message || '')) {
+      const pref = `Prefers ${m.label}: ${method === 'instagram' ? '@' : ''}${handle}`;
+      ({ error: dbError } = await supabase.from('leads').insert([{ ...base, notes: [base.notes, pref].filter(Boolean).join(' · ') }]));
+    }
     setSending(false);
     if (dbError) { setError('Something went wrong. Please try again.'); return; }
     setDone(true);
   }
 
   if (done) {
+    const how = method === 'phone' ? 'will be in touch soon.'
+      : method === 'email' ? 'will email you soon.'
+      : `will message you on ${m.label} soon.${method === 'whatsapp' ? '' : ' Keep an eye on your message requests.'}`;
     return (
       <div className="rp-done" role="status">
         <span className="rp-done-icon"><RepIcon name="check" size={28} strokeWidth={2.5} /></span>
         <h3 className="rp-h2" style={{ fontSize: 24, lineHeight: '28px' }}>You&apos;re all set.</h3>
-        <p>{who} will be in touch soon.</p>
+        <p>{who} {how}</p>
       </div>
     );
   }
 
   const id = (s) => `${s}-${formId}`;
+  const inputType = method === 'email' ? 'email' : (method === 'phone' || method === 'whatsapp') ? 'tel' : 'text';
+  const autoComplete = method === 'email' ? 'email' : (method === 'phone' || method === 'whatsapp') ? 'tel' : 'off';
   return (
     <form onSubmit={handleSubmit} noValidate style={{ display: 'contents' }}>
       {cfg.question && cfg.options.length > 0 && (
@@ -309,11 +383,32 @@ function LeadForm({ repId, repName, cfg, formId, preview }) {
         <label className="rp-label" htmlFor={id('name')}>Your name</label>
         <input className="rp-input" id={id('name')} type="text" autoComplete="name" placeholder={cfg.namePlaceholder} value={name} onChange={e => setName(e.target.value)} />
       </div>
+      {cfg.methods.length > 1 && (
+        <fieldset className="rp-fieldset">
+          <legend className="rp-legend">How should {firstName(repName) || 'they'} reach you?</legend>
+          <div className="rp-methods">
+            {cfg.methods.map(key => (
+              <label key={key} className={`rp-method${method === key ? ' is-on' : ''}`} htmlFor={id(`m-${key}`)}>
+                <input id={id(`m-${key}`)} type="radio" name={id('method')} checked={method === key} onChange={() => pick(key)} />
+                <MethodIcon method={key} />
+                <span>{CONTACT_METHODS[key].short}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <div className="rp-field">
-        <label className="rp-label" htmlFor={id('phone')}>Phone number</label>
-        <input className="rp-input" id={id('phone')} type="tel" autoComplete="tel" placeholder={cfg.phonePlaceholder} value={phone} onChange={e => setPhone(e.target.value)} />
+        <label className="rp-label" htmlFor={id('contact')}>{m.field}</label>
+        <input className="rp-input" id={id('contact')} type={inputType} autoComplete={autoComplete}
+          autoCapitalize={method === 'instagram' || method === 'email' ? 'none' : undefined}
+          inputMode={inputType === 'tel' ? 'tel' : undefined}
+          placeholder={method === 'phone' ? cfg.phonePlaceholder : m.placeholder}
+          value={contact} onChange={e => setContact(e.target.value)} />
+        {(method === 'instagram' || method === 'facebook') && (
+          <span className="rp-hint">{who} will message you there. It may show up in your message requests.</span>
+        )}
       </div>
-      {cfg.collectEmail && (
+      {askEmailToo && (
         <div className="rp-field">
           <label className="rp-label" htmlFor={id('email')}>Email</label>
           <input className="rp-input" id={id('email')} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
@@ -330,12 +425,7 @@ function LeadForm({ repId, repName, cfg, formId, preview }) {
         {sending ? 'Sending…' : cfg.button}{!sending && <RepIcon name="arrowRight" size={20} strokeWidth={2.5} />}
       </button>
       <span className="rp-trust"><RepIcon name="lock" size={16} />Goes straight to {who}. No spam, ever.</span>
-      {/* TCPA disclosure: consent to calls/texts about this request. */}
-      <p className="rp-tcpa">
-        By tapping &ldquo;{cfg.button}&rdquo;, you agree that {repName || 'this professional'} may call or text you at the number
-        above about your request, including by automated means. Consent isn&apos;t a condition of any purchase. Msg &amp; data
-        rates may apply; reply STOP to opt out. See our <Link href="/privacy">Privacy Policy</Link>.
-      </p>
+      <Consent method={method} button={cfg.button} repName={repName} />
     </form>
   );
 }
