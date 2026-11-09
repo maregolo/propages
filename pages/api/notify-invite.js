@@ -1,3 +1,7 @@
+// Emails Mar when someone requests an invite.
+// Env: RESEND_API_KEY; INVITE_FROM_EMAIL optional, default
+// "ProPages <notifications@propages.pro>" (propages.pro is verified in Resend).
+
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -14,7 +18,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: 'ProPages <onboarding@resend.dev>',
+      from: process.env.INVITE_FROM_EMAIL || 'ProPages <notifications@propages.pro>',
       to: 'marcusregolo@gmail.com',
       subject: `New invite request — ${String(name).slice(0, 80)}`,
       html: `

@@ -31,7 +31,7 @@ const PROOF = [
 const PRICE_ROWS = [
   { name: 'Your Page + Lead Capture', note: 'Website builder + form tool, typically', price: '$20/mo' },
   { name: 'Verified Badge', note: 'Trust signal, standalone tools charge for this', price: '$8/mo' },
-  { name: 'SMS Lead Alerts', note: 'Typical CRM alert add-on', price: '$25/mo' },
+  { name: 'Instant Lead Alerts', note: 'Typical CRM alert add-on', price: '$25/mo' },
   { name: 'Conversion Analytics', note: 'Standalone analytics tool, entry tier', price: '$19/mo' },
   { name: 'A/B Testing Tools', note: 'Standalone optimization tool', price: '$39/mo' },
 ];
