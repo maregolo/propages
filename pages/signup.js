@@ -7,6 +7,7 @@ import Button from '../components/site/Button';
 import Field from '../components/site/Field';
 import Icon from '../components/site/icons';
 import { SITE_URL } from '../lib/site';
+import { LEGAL } from '../lib/legal';
 
 export default function Signup() {
   const router = useRouter();
@@ -104,6 +105,8 @@ export default function Signup() {
     const { error: signUpError } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
+      // Record of Terms acceptance, stored on the auth user at the moment of signup.
+      options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.effective } },
     });
 
     if (signUpError) {
@@ -125,6 +128,8 @@ export default function Signup() {
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
+      // Record of Terms acceptance, stored on the auth user at the moment of signup.
+      options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.effective } },
     });
 
     if (signInError) {

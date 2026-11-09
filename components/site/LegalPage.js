@@ -2,14 +2,9 @@
 import Link from 'next/link';
 import AppShell from './AppShell';
 import Icon from './icons';
+import { LEGAL } from '../../lib/legal';
 
-// ── Fill these in before publishing (see the PR) ──────────────────────────
-export const LEGAL = {
-  effective: 'November 5, 2026',
-  contactEmail: 'support@propages.pro',   // must be a mailbox you actually read
-  governingState: 'Rhode Island',            // the state whose law governs the Terms
-  minimumAge: 18,
-};
+export { LEGAL };
 
 export default function LegalPage({ title, intro, children }) {
   return (

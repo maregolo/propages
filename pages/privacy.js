@@ -28,13 +28,12 @@ export default function Privacy() {
         <li><strong>Account:</strong> email address and password. Passwords are stored as one-way hashes by our authentication provider; we can&apos;t see them.</li>
         <li><strong>Profile and page:</strong> name, handle, title, city, industry, whether you&apos;re independent or employed, phone number (optional), photo (optional), links, and the content you add to your page.</li>
         <li><strong>Referrals:</strong> if you sign up through another rep&apos;s link, which rep referred you.</li>
-        <li><strong>Agreement:</strong> when you accepted the Terms of Service.</li>
+        <li><strong>Agreement:</strong> when you accepted the Terms of Service, and which version.</li>
       </ul>
       <h3>From people who fill out a rep&apos;s form</h3>
       <ul>
         <li>Name and phone number, plus email address and zip code if the rep asks for them.</li>
         <li>Your answer to the rep&apos;s question (for example, whether you own your home).</li>
-        <li>If you refer a neighbor or friend: your name and email, and theirs.</li>
       </ul>
       <h3>From visitors</h3>
       <ul>
