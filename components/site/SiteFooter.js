@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Logo from '../Logo';
 import Container from './Container';
 
@@ -9,7 +10,13 @@ export default function SiteFooter({ tagline = 'Built for the reps who show up e
           <Logo height={28} />
           <span className="site-footer__tag">{tagline}</span>
         </div>
-        <span className="site-footer__copy">© {new Date().getFullYear()} ProPages. All rights reserved.</span>
+        <div className="site-footer__brand">
+          <nav className="site-footer__links" aria-label="Legal">
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+          </nav>
+          <span className="site-footer__copy">© {new Date().getFullYear()} ProPages. All rights reserved.</span>
+        </div>
       </Container>
     </footer>
   );

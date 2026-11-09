@@ -411,3 +411,15 @@ a.dash-tool:focus-visible, a.dash-todo:focus-visible { outline: 2px solid var(--
   .dash-actions { width: 100%; }
   .dash-actions .site-btn { flex: 1 1 auto; }
 }
+
+/* ── Legal pages (/terms, /privacy) ───────────────────────────────────── */
+.legal__body { font-size: 17px; line-height: 1.7; color: var(--site-ink-2); }
+.legal__body h2 { margin: 40px 0 10px; font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; color: var(--site-ink); }
+.legal__body h2:first-child { margin-top: 0; }
+.legal__body h3 { margin: 24px 0 6px; font-size: 17px; font-weight: 700; color: var(--site-ink); }
+.legal__body p { margin: 0 0 14px; }
+.legal__body ul { margin: 0 0 14px; padding-left: 22px; }
+.legal__body li { margin-bottom: 6px; }
+.legal__body a, .legal__contact a { color: var(--site-mint-ink); font-weight: 600; }
+.legal__body strong { color: var(--site-ink); font-weight: 600; }
+.legal__contact { margin: 0; padding: 20px 24px; border-radius: var(--site-r-card); background: #FFFFFF; border: 1px solid var(--site-line); font-size: 16px; }
