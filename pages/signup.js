@@ -65,18 +65,20 @@ export default function Signup() {
 
     const clean = email.trim().toLowerCase();
 
-    // Check if they already have an account by attempting a dummy reset
-    // The cleanest way without service role: try signInWithPassword with a blank
-    // password and check the error code. If 'invalid_credentials', user exists.
-    // If 'email_not_confirmed' or similar, also exists. Any other error = no account.
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: clean,
-      password: '##CHECK_ONLY##',
-    });
-
-    const userExists =
-      signInError?.message?.includes('Invalid login credentials') ||
-      signInError?.message?.includes('Email not confirmed');
+    // Ask the server whether this email has an account. (The browser can't
+    // tell: Supabase gives unknown emails and wrong passwords the same error.)
+    // If the check fails, fall back to sign-in, which links to "create account".
+    let userExists = true;
+    try {
+      const r = await fetch('/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: clean }),
+      });
+      if (r.ok) userExists = (await r.json()).exists === true;
+    } catch {
+      // keep the sign-in fallback
+    }
 
     setLoading(false);
     setStep(userExists ? 'returning_user' : 'new_user');
@@ -128,8 +130,6 @@ export default function Signup() {
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
-      // Record of Terms acceptance, stored on the auth user at the moment of signup.
-      options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.effective } },
     });
 
     if (signInError) {
@@ -272,6 +272,9 @@ export default function Signup() {
                 {loading ? 'Creating account…' : 'Create account'}
               </Button>
             </form>
+            <button type="button" className="site-textbtn" onClick={() => { setStep('returning_user'); setError(''); }}>
+              <Icon name="arrowLeft" />Already have an account? Sign in
+            </button>
           </>
         )}
 
@@ -298,6 +301,9 @@ export default function Signup() {
             </form>
             <button type="button" className="site-textbtn" onClick={() => { setStep('forgot_password'); setError(''); }}>
               <Icon name="key" />Forgot password?
+            </button>
+            <button type="button" className="site-textbtn" onClick={() => { setStep('new_user'); setError(''); setPassword(''); }}>
+              <Icon name="person" />New here? Create an account
             </button>
           </>
         )}
