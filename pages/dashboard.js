@@ -6,6 +6,7 @@ import Button from '../components/site/Button';
 import Icon from '../components/site/icons';
 import { DOMAIN } from '../components/site/HandleField';
 import { SITE } from '../components/SiteMeta';
+import { normalizeBlocks, cleanLinks, cleanTestimonials } from '../lib/repBlocks';
 
 const LEADS_PREVIEW = 3;
 const DAY = 24 * 60 * 60 * 1000;
@@ -203,15 +204,17 @@ export default function Dashboard() {
 }
 
 // What's left to make the page convincing. Each item opens edit mode.
+// Reads blocks through normalizeBlocks so older pages (separate profile /
+// headline / stats blocks) count the same as the merged hero.
 function finishItems(rep) {
-  const blocks = rep.blocks || [];
+  const blocks = normalizeBlocks(rep.blocks);
   const blockData = (type) => blocks.find(b => b.type === type)?.data || {};
-  const filled = (obj) => Object.values(obj).some(v => (Array.isArray(v) ? v.length > 0 : v !== null && v !== undefined && v !== ''));
+  const hero = blockData('hero');
   return [
-    { key: 'photo', short: 'Photo', label: 'Add a photo', icon: 'camera', done: !!rep.photo_url },
-    { key: 'headline', short: 'headline', label: 'Write your headline', icon: 'headline', done: filled(blockData('headline')) },
-    { key: 'links', short: 'links', label: 'Add your links', icon: 'link', done: (blockData('links').links || []).length > 0 },
-    { key: 'reviews', short: 'testimonial', label: 'Add a customer testimonial', icon: 'quote', done: filled(blockData('testimonials')) },
+    { key: 'photo', short: 'Photo', label: 'Add a photo', icon: 'camera', done: !!(rep.photo_url || hero.photo_url) },
+    { key: 'headline', short: 'headline', label: 'Write your headline', icon: 'headline', done: !!String(hero.headline || '').trim() },
+    { key: 'links', short: 'links', label: 'Add your links', icon: 'link', done: cleanLinks(blockData('links').links).length > 0 },
+    { key: 'reviews', short: 'testimonial', label: 'Add a customer review', icon: 'quote', done: cleanTestimonials(blockData('testimonials').testimonials).length > 0 },
   ];
 }
 
