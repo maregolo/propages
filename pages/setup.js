@@ -460,7 +460,7 @@ export default function Setup() {
                 placeholder="(602) 555-0100"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                hint="We'll text you the moment a lead comes in. US numbers only."
+                hint="Lead alerts go to your email for now. Text alerts are coming soon. US numbers only."
               />
 
               <Alert error={error} />
