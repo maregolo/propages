@@ -399,6 +399,8 @@ a.dash-tool:focus-visible, a.dash-todo:focus-visible { outline: 2px solid var(--
 .dash-lead__details a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .dash-lead__details svg { flex-shrink: 0; color: var(--site-muted); }
 .dash-lead__details .ellip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-lead__details small { margin-left: auto; padding-left: 8px; font-size: 13px; font-weight: 600; color: var(--site-mint-ink); white-space: nowrap; }
+.dash-lead__pref { margin: -6px 0 0; padding-left: 52px; font-size: 14px; font-weight: 600; color: var(--site-coral-ink); }
 .dash-empty { padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
 .dash-empty p { margin: 0; color: var(--site-muted); font-size: 16px; line-height: 1.5; }
 .dash-user { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
@@ -407,6 +409,7 @@ a.dash-tool:focus-visible, a.dash-todo:focus-visible { outline: 2px solid var(--
 .site-app--light .site-app__main { padding-top: 40px; padding-bottom: 72px; }
 @media (max-width: 560px) {
   .dash-lead__details { padding-left: 0; }
+  .dash-lead__pref { padding-left: 0; }
   .dash-user__name { display: none; }
   .dash-actions { width: 100%; }
   .dash-actions .site-btn { flex: 1 1 auto; }

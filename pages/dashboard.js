@@ -7,6 +7,7 @@ import Icon from '../components/site/icons';
 import { DOMAIN } from '../components/site/HandleField';
 import { SITE } from '../components/SiteMeta';
 import { normalizeBlocks, cleanLinks, cleanTestimonials } from '../lib/repBlocks';
+import { CONTACT_METHODS, leadContactLink } from '../lib/contact';
 
 const LEADS_PREVIEW = 3;
 const DAY = 24 * 60 * 60 * 1000;
@@ -20,6 +21,7 @@ export default function Dashboard() {
   const [viewCount, setViewCount] = useState(0);
   const [weeklyViewCount, setWeeklyViewCount] = useState(0);
   const [topLink, setTopLink] = useState(null);
+  const [dmTaps, setDmTaps] = useState([]);
   const [copied, setCopied] = useState(false);
   const [now, setNow] = useState(0);
 
@@ -40,11 +42,12 @@ export default function Dashboard() {
 
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      const [{ data: leadsData }, { count: totalViews }, { count: weeklyViews }, { data: clickRows }] = await Promise.all([
+      const [{ data: leadsData }, { count: totalViews }, { count: weeklyViews }, { data: clickRows }, { data: dmRows }] = await Promise.all([
         supabase.from('leads').select('*').eq('rep_id', profile.id).order('created_at', { ascending: false }),
         supabase.from('page_views').select('*', { count: 'exact', head: true }).eq('rep_id', profile.id),
         supabase.from('page_views').select('*', { count: 'exact', head: true }).eq('rep_id', profile.id).gte('viewed_at', weekAgo),
         supabase.from('block_events').select('label').eq('rep_id', profile.id).eq('event_type', 'link_click'),
+        supabase.from('block_events').select('label').eq('rep_id', profile.id).eq('event_type', 'dm_click').gte('created_at', weekAgo),
       ]);
 
       setLeads(leadsData || []);
@@ -57,6 +60,10 @@ export default function Dashboard() {
         const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
         setTopLink(top ? top[0] : null);
       }
+
+      const dm = {};
+      (dmRows || []).forEach(r => { if (r.label) dm[r.label] = (dm[r.label] || 0) + 1; });
+      setDmTaps(Object.entries(dm).sort((a, b) => b[1] - a[1]));
 
       setNow(Date.now());
       setLoading(false);
@@ -128,6 +135,11 @@ export default function Dashboard() {
             </div>
 
             {topLink && <p className="dash-note">Top link: <strong>{topLink}</strong></p>}
+            {dmTaps.length > 0 && (
+              <p className="dash-note">
+                Message taps this week: {dmTaps.map(([ch, n], i) => <span key={ch}>{i > 0 && ' · '}<strong>{DM_LABELS[ch] || ch} {n}</strong></span>)}
+              </p>
+            )}
 
             {open.length > 0 && (
               <section className="dash-card dash-finish" aria-labelledby="finish-title">
@@ -223,8 +235,13 @@ function listJoin(items) {
   return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
+const DM_LABELS = { instagram: 'Instagram', facebook: 'Messenger', whatsapp: 'WhatsApp', text: 'Text' };
+
 function LeadCard({ lead, now }) {
-  const ownership = lead.notes ? lead.notes.replace('Home ownership: ', '').trim() : null;
+  // Older leads stored the qualifying answer as "Home ownership: <answer>".
+  const answer = lead.notes ? lead.notes.replace(/^Home ownership: /, '').trim() : null;
+  const method = lead.contact_method && CONTACT_METHODS[lead.contact_method] ? lead.contact_method : null;
+  const dm = method ? leadContactLink(method, lead.contact_handle) : null;
   const created = new Date(lead.created_at);
   const when = created.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     + ' · ' + created.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -237,11 +254,13 @@ function LeadCard({ lead, now }) {
         <span className="dash-lead__who"><b>{lead.name}</b><span>{when}</span></span>
         {isNew && <span className="dash-new">New</span>}
       </div>
+      {method && <p className="dash-lead__pref">Prefers {CONTACT_METHODS[method].label}</p>}
       <div className="dash-lead__details">
-        {lead.phone && <a href={`tel:${lead.phone}`}><Icon name="phone" size={16} />{lead.phone}</a>}
+        {dm && <a href={dm.href} target="_blank" rel="noopener noreferrer"><Icon name={method === 'instagram' ? 'instagram' : 'external'} size={16} /><span className="ellip">{dm.text}</span><small>{dm.action}</small></a>}
+        {lead.phone && method !== 'whatsapp' && <a href={`tel:${lead.phone}`}><Icon name="phone" size={16} />{lead.phone}</a>}
         {lead.email && <a href={`mailto:${lead.email}`}><Icon name="mail" size={16} /><span className="ellip">{lead.email}</span></a>}
         {lead.zip && <span><Icon name="pin" size={16} />{lead.zip}</span>}
-        {ownership && <span><Icon name="home" size={16} />{ownership}</span>}
+        {answer && <span><Icon name="check" size={16} />{answer}</span>}
       </div>
     </article>
   );
