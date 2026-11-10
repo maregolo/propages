@@ -249,6 +249,20 @@ export function LeadCaptureBlock({ block, rep, defaults, isOwner, editMode, prof
         {cfg.sub && <p className="rp-form-sub">{cfg.sub}</p>}
       </div>
       <LeadForm repId={rep.id} repName={rep.name} cfg={cfg} formId={block.id} preview={editMode} />
+      {buttons.length === 0 && editMode && (
+        <Sample label="Message buttons · set up in this form">
+          <div className="rp-dm">
+            <span className="rp-dm-head">Rather message {who || 'me'} directly?</span>
+            {[['instagram', 'Message on Instagram'], ['text', 'Send a text']].map(([ch, label]) => (
+              <span key={ch} className="rp-dm-btn">
+                <span className="rp-dm-icon">{ch === 'text' ? <RepIcon name="chat" size={20} /> : <BrandIcon platform={ch} size={20} />}</span>
+                <span className="rp-dm-label">{label}</span>
+                <RepIcon name="external" size={16} />
+              </span>
+            ))}
+          </div>
+        </Sample>
+      )}
       {buttons.length > 0 && (
         <div className="rp-dm" role="group" aria-labelledby={`dm-h-${block.id}`}>
           <span className="rp-dm-head" id={`dm-h-${block.id}`}>Rather message {who || 'them'} directly?</span>

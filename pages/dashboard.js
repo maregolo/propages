@@ -32,7 +32,7 @@ export default function Dashboard() {
 
       const { data: profile } = await supabase
         .from('reps')
-        .select('*')
+        .select('id, slug, name, photo_url, blocks')
         .eq('auth_id', session.user.id)
         .maybeSingle();
 

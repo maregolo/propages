@@ -21,6 +21,7 @@ import { getTheme, themeToCSS, DEFAULT_THEME, THEMES } from '../lib/themes';
 import { SITE_URL } from '../lib/site';
 import { getDefaults } from '../lib/repDefaults';
 import { normalizeBlocks, cleanLinks } from '../lib/repBlocks';
+import { PUBLIC_REP_COLUMNS as PUBLIC_FIELDS } from '../lib/repColumns';
 import { renderBlock, RepFooter } from '../components/rep/blocks';
 import { renderEditor } from '../components/rep/editors';
 import { OwnerBar, BlockBar, AddBlock, LiveToast, WelcomeBanner, BLOCK_LABELS } from '../components/rep/owner';
@@ -237,19 +238,21 @@ function BlockPage({ initialRep }) {
 
 // ─── Server-side data fetch ───────────────────────────────────────────────────
 
-// Only what the page needs. Leaves out the rep's private phone number and
-// other account fields that used to be sent to every visitor.
-const PUBLIC_FIELDS = ['id', 'slug', 'auth_id', 'name', 'title', 'city', 'industry', 'photo_url', 'blocks', 'accent', 'theme', 'badge_tier', 'lead_capture'];
+// Only what the page needs. These are also the only `reps` columns the public
+// (anon) key may read: see lib/repColumns.js and the grant in SCHEMA_final.md.
 
-export async function getServerSideProps({ params, req }) {
+export async function getServerSideProps({ params, req, res }) {
   const slug = params.slug;
-  const reserved = ['signup', 'setup', 'envtest', 'api', 'dashboard', 'reset', 'certified'];
+  const reserved = ['signup', 'setup', 'api', 'dashboard', 'reset', 'certified'];
   if (reserved.includes(slug)) {
     return { redirect: { destination: `/${slug}`, permanent: false } };
   }
 
-  const { data, error } = await supabase.from('reps').select('*').eq('slug', slug).maybeSingle();
-  if (error || !data) return { props: { rep: null } };
+  const { data, error } = await supabase.from('reps').select(PUBLIC_FIELDS.join(', ')).eq('slug', slug).maybeSingle();
+  if (error || !data) {
+    res.statusCode = 404;
+    return { props: { rep: null } };
+  }
 
   // Page view (fire-and-forget). Skip bots and link-preview crawlers.
   const ua = req.headers['user-agent'] || '';
