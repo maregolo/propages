@@ -281,6 +281,7 @@ export function WelcomeBanner({ slug, onDismiss, onEdit }) {
       <div style={{ flex: 1 }}>
         <b>This is your page. Make it yours.</b>
         <p>The words below are suggestions for your industry. Swap in your own, then add real reviews and proof numbers. Those stay hidden from visitors until you do.</p>
+        <p style={{ marginTop: 8 }}>Leads come to your email and dashboard. Visitors who message you on Instagram or Facebook usually land in your <b style={{ color: 'var(--site-on-dark)' }}>message requests</b>, so check there too.</p>
         {onEdit && <button type="button" className="ow-textbtn" onClick={() => { onEdit(); dismiss(); }} style={{ color: 'var(--site-mint)' }}>Start editing<RepIcon name="arrowRight" size={16} /></button>}
       </div>
       <button type="button" className="ow-iconbtn" onClick={dismiss} aria-label="Dismiss"><RepIcon name="close" size={18} /></button>

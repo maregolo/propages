@@ -295,7 +295,7 @@ export function LeadCaptureEditor({ block, rep, defaults, onSave, onCancel, prof
       </div>
       <div className="ow-group">
         <span className="ow-group-title">Message buttons</span>
-        <span className="ow-hint">Buttons under the form that open a chat with you in the visitor&apos;s own app. Each tap is counted on your dashboard.</span>
+        <span className="ow-hint">Buttons under the form that open a chat with you in the visitor&apos;s own app. Each tap is counted on your dashboard. Instagram and Facebook messages from people you don&apos;t follow land in your <b>message requests</b>, so check there.</span>
         <label className="ow-check">
           <input type="checkbox" checked={msgIg} onChange={e => setMsgIg(e.target.checked)} />
           Instagram {sources.instagram ? <span className="ow-hint">@{sources.instagram}</span> : <span className="ow-hint">add your Instagram to Links first</span>}
