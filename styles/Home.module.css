@@ -54,7 +54,19 @@
 }
 .heroCopy .eyebrow { color: var(--site-on-dark-2); }
 .heroTitle { text-transform: uppercase; }
-.heroTitle .accent { display: block; color: var(--site-coral); }
+.heroTitle .accent {
+  display: block;
+  width: fit-content;
+  color: var(--site-coral);  /* fallback where gradient text isn't supported */
+  /* Warm sweep, amber to coral ("Coral E" on the canvas). */
+  background-image: linear-gradient(100deg, #FFC98E 0%, #FFB59C 50%, #FF9A88 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@media (forced-colors: active) {
+  .heroTitle .accent { -webkit-text-fill-color: currentColor; background-image: none; }
+}
 .nowrap { white-space: nowrap; }
 .heroSub { margin: 0; font-size: 22.5px; line-height: 1.55; color: var(--site-on-dark-2); max-width: 520px; }
 .heroSub strong { color: var(--site-on-dark); font-weight: 600; }
