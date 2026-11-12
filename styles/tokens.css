@@ -12,13 +12,13 @@
      and exposed as --font-outfit; this falls back cleanly before it applies. */
   --site-font: var(--font-outfit), system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Color — v14 "blue slate" field, mint reserved for primary actions,
+  /* Color — v14 "blue slate" field (darkened 2026-11-12 for more contrast), mint reserved for primary actions,
      coral for highlights, progress and selection. */
-  --site-dark: #27303A;          /* hero / app field */
-  --site-dark-2: #323C47;        /* cards and nav pill on dark */
+  --site-dark: #161A20;          /* hero / app field (darkened from #27303A, 2026-11-12) */
+  --site-dark-2: #20262E;        /* cards and nav pill on dark (was #323C47) */
   --site-frame: #181E25;         /* text on mint buttons */
   --site-on-dark: #EEF1F4;       /* primary text on dark */
-  --site-on-dark-2: #BAC4CE;     /* secondary text on dark (7.4:1) */
+  --site-on-dark-2: #BAC4CE;     /* secondary text on dark (9.9:1 on --site-dark) */
   --site-ink: #222A33;           /* primary text on light */
   --site-ink-2: #3F4743;         /* body text on light */
   --site-muted: #5E6762;         /* secondary text on light (5.9:1) */
