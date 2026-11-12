@@ -155,7 +155,13 @@ a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-of
   padding: 0 24px;
   cursor: text;
 }
-.site-claim__field:focus-within { box-shadow: 0 0 0 2px var(--site-dark), 0 0 0 4px var(--site-mint); }
+/* On dark: the field sits slightly recessed (soft grey, inner shadow) so the
+   lit mint button reads as the raised element. ("CTA E" field on the canvas.) */
+.site-claim:not(.site-claim--on-light) .site-claim__field {
+  background: #F1F4F6;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.06);
+}
+.site-claim:not(.site-claim--on-light) .site-claim__field:focus-within { box-shadow: inset 0 2px 5px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(0,0,0,0.06), 0 0 0 2px var(--site-dark), 0 0 0 4px var(--site-mint); }
 .site-claim--on-light .site-claim__field { box-shadow: inset 0 0 0 1px #868685; }
 .site-claim--on-light .site-claim__field:focus-within { box-shadow: inset 0 0 0 1px #868685, var(--site-focus); }
 .site-claim__prefix { font-size: 18.5px; font-weight: 500; color: var(--site-muted); white-space: nowrap; }
