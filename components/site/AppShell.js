@@ -51,7 +51,7 @@ export default function AppShell({
       <Head>
         <title>{title ? `${title} – ProPages` : 'ProPages'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content={dark ? '#27303A' : '#F8F9FA'} />
+        <meta name="theme-color" content={dark ? '#161A20' : '#F8F9FA'} />
       </Head>
       <div
         className={`site-app ${dark ? 'site-app--dark site-on-dark' : 'site-app--light'} ${hasSteps ? 'site-app--steps' : ''}`}
