@@ -6,10 +6,10 @@
 
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { uploadImage, ImageError } from '../../lib/imageUpload';
 import RepIcon, { LINK_ICON_CHOICES, linkIconName } from './RepIcon';
 import { formConfig } from './blocks';
 import { cleanLinks, cleanStats, cleanTestimonials, normalizeUrl } from '../../lib/repBlocks';
+import { uploadImage, ImageError } from '../../lib/imageUpload';
 import { CONTACT_METHODS, digits, messageSources } from '../../lib/contact';
 
 function Shell({ title, note, error, saving, onSave, onCancel, children }) {
