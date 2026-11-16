@@ -10,6 +10,7 @@ import { US_STATES, formatLocation, parseLocation } from '../../lib/location';
 import RepIcon, { LINK_ICON_CHOICES, linkIconName } from './RepIcon';
 import { formConfig } from './blocks';
 import { cleanLinks, cleanStats, cleanTestimonials, normalizeUrl } from '../../lib/repBlocks';
+import { uploadImage, ImageError } from '../../lib/imageUpload';
 import { CONTACT_METHODS, digits, messageSources } from '../../lib/contact';
 
 function Shell({ title, note, error, saving, onSave, onCancel, children }) {
@@ -76,11 +77,13 @@ export function HeroEditor({ block, rep, defaults, onSave, onCancel, onRepPatch 
     setSaving(true);
     const patch = { name: trim(name), title: trim(title), city: formatLocation(city, usState) };
     if (photo) {
-      const ext = (photo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const path = `${rep.slug}-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('avatars').upload(path, photo);
-      if (upErr) { setSaving(false); setError('Photo upload failed. Try a smaller image, or save without it.'); return; }
-      patch.photo_url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      try {
+        patch.photo_url = await uploadImage(photo, { slug: rep.slug, kind: 'avatar' });
+      } catch (err) {
+        setSaving(false);
+        setError(err instanceof ImageError ? err.message : 'Photo upload failed. Try another photo, or save without it.');
+        return;
+      }
     }
     const { error: repErr } = await supabase.from('reps').update(patch).eq('id', rep.id);
     if (repErr) { setSaving(false); setError('Something went wrong. Please try again.'); return; }
@@ -401,33 +404,95 @@ export function VideoEditor({ block, onSave, onCancel }) {
   );
 }
 
-export function PortfolioEditor({ block, onSave, onCancel }) {
+const MAX_PHOTOS = 12;
+
+export function PortfolioEditor({ block, rep, onSave, onCancel }) {
   const d = block.data || {};
   const [heading, setHeading] = useState(d.heading || '');
   const [layout, setLayout] = useState(d.layout || 'grid');
-  const [images, setImages] = useState(d.images?.length ? d.images : [{ url: '', caption: '' }]);
+  const [images, setImages] = useState(d.images?.length ? d.images : []);
+  const [uploading, setUploading] = useState('');
+  const [error, setError] = useState('');
   const update = (i, k, v) => setImages(prev => prev.map((img, idx) => (idx === i ? { ...img, [k]: v } : img)));
+  const move = (i, dir) => setImages(prev => {
+    const j = i + dir;
+    if (j < 0 || j >= prev.length) return prev;
+    const next = [...prev];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  });
+  const room = MAX_PHOTOS - images.length;
+
+  async function handleFiles(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    setError('');
+    const batch = files.slice(0, Math.max(room, 0));
+    if (files.length > batch.length) setError(`Up to ${MAX_PHOTOS} photos. Only the first ${batch.length} were added.`);
+    for (let n = 0; n < batch.length; n++) {
+      setUploading(batch.length > 1 ? `Uploading ${n + 1} of ${batch.length}…` : 'Uploading…');
+      try {
+        const url = await uploadImage(batch[n], { slug: rep?.slug, kind: 'portfolio' });
+        setImages(prev => [...prev, { url, caption: '' }]);
+      } catch (err) {
+        setError(err instanceof ImageError ? err.message : 'Upload failed. Please try again.');
+        break;
+      }
+    }
+    setUploading('');
+  }
+
+  function handleSave() {
+    if (uploading) return;
+    onSave({
+      ...d,
+      heading: trim(heading),
+      layout,
+      images: images.filter(img => trim(img.url)).map(img => ({ url: normalizeUrl(img.url), caption: trim(img.caption) })),
+    });
+  }
+
   return (
-    <Shell title="Portfolio" note="Paste links to photos of your work."
-      onSave={() => onSave({ ...d, heading: trim(heading), layout, images: images.filter(img => trim(img.url)).map(img => ({ url: normalizeUrl(img.url), caption: trim(img.caption) })) })}
-      onCancel={onCancel}>
+    <Shell title="Portfolio" note="Photos of your work. They're resized on your device before upload, so big phone photos are fine."
+      error={error} saving={!!uploading} onSave={handleSave} onCancel={onCancel}>
       <Field label="Heading" optional><input className="ow-input" value={heading} onChange={e => setHeading(e.target.value)} placeholder="Recent work" /></Field>
       <div className="ow-group">
         <span className="ow-group-title">Layout</span>
         <label className="ow-check"><input type="radio" name={`layout-${block.id}`} checked={layout === 'grid'} onChange={() => setLayout('grid')} />Grid</label>
         <label className="ow-check"><input type="radio" name={`layout-${block.id}`} checked={layout === 'carousel'} onChange={() => setLayout('carousel')} />Swipeable row</label>
       </div>
-      {images.map((img, i) => (
-        <div className="ow-group" key={i}>
-          <div className="ow-group-head">
-            <span className="ow-group-title">Photo {i + 1}</span>
-            <button type="button" className="ow-iconbtn is-danger" onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))} aria-label="Remove photo"><RepIcon name="trash" size={18} /></button>
+      {images.map((img, i) => {
+        const src = trim(img.url) ? normalizeUrl(img.url) : '';
+        return (
+          <div className="ow-group ow-photo" key={i}>
+            {/^https?:\/\//i.test(src || '')
+              ? <img className="ow-photo-thumb" src={src} alt="" />
+              : <span className="ow-photo-thumb ow-photo-thumb--empty" aria-hidden="true"><RepIcon name="image" size={22} /></span>}
+            <div className="ow-photo-fields">
+              <div className="ow-group-head">
+                <span className="ow-group-title">Photo {i + 1}</span>
+                <span className="ow-photo-tools">
+                  <button type="button" className="ow-iconbtn" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Move photo ${i + 1} up`}><RepIcon name="up" size={18} /></button>
+                  <button type="button" className="ow-iconbtn" onClick={() => move(i, 1)} disabled={i === images.length - 1} aria-label={`Move photo ${i + 1} down`}><RepIcon name="down" size={18} /></button>
+                  <button type="button" className="ow-iconbtn is-danger" onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))} aria-label={`Remove photo ${i + 1}`}><RepIcon name="trash" size={18} /></button>
+                </span>
+              </div>
+              {img.pasted && <input className="ow-input" aria-label={`Link for photo ${i + 1}`} value={img.url} onChange={e => update(i, 'url', e.target.value)} placeholder="https://…" inputMode="url" autoCapitalize="none" />}
+              <input className="ow-input" aria-label={`Caption for photo ${i + 1}`} value={img.caption || ''} onChange={e => update(i, 'caption', e.target.value)} placeholder="Caption (optional)" />
+            </div>
           </div>
-          <input className="ow-input" aria-label="Photo link" value={img.url} onChange={e => update(i, 'url', e.target.value)} placeholder="https://…" inputMode="url" autoCapitalize="none" />
-          <input className="ow-input" aria-label="Caption" value={img.caption || ''} onChange={e => update(i, 'caption', e.target.value)} placeholder="Caption (optional)" />
-        </div>
-      ))}
-      <button type="button" className="ow-addrow" onClick={() => setImages(prev => [...prev, { url: '', caption: '' }])}><RepIcon name="plus" size={18} />Add a photo</button>
+        );
+      })}
+      {room > 0 ? (
+        <>
+          <label className={`ow-addrow ow-upload ${uploading ? 'is-busy' : ''}`}>
+            <input type="file" accept="image/*" multiple onChange={handleFiles} disabled={!!uploading} className="ow-upload-input" />
+            <RepIcon name={uploading ? 'image' : 'plus'} size={18} />{uploading || (images.length ? 'Add more photos' : 'Upload photos')}
+          </label>
+          <button type="button" className="ow-textbtn" onClick={() => setImages(prev => [...prev, { url: '', caption: '', pasted: true }])}><RepIcon name="link" size={16} />Paste a photo link instead</button>
+        </>
+      ) : <p className="ow-hint">That&apos;s the maximum of {MAX_PHOTOS} photos. Remove one to add another.</p>}
     </Shell>
   );
 }
