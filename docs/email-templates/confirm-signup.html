@@ -1,0 +1,19 @@
+<!-- Supabase → Authentication → Email Templates → "Confirm signup".
+     Subject: Confirm your email to start your ProPage
+     Needs custom SMTP turned on, or Supabase falls back to its default template. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8F9FA;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#FFFFFF;border-radius:16px;overflow:hidden;">
+      <tr><td style="background:#161A20;padding:24px 32px;">
+        <span style="font-size:22px;font-weight:700;color:#AAFFCC;font-style:italic;">pro</span><span style="font-size:22px;font-weight:700;color:#FFFFFF;">pages</span>
+      </td></tr>
+      <tr><td style="padding:32px;">
+        <h1 style="margin:0 0 12px;font-size:26px;line-height:1.2;color:#161A20;">Confirm your email</h1>
+        <p style="margin:0 0 24px;font-size:16px;line-height:1.5;color:#3D4650;">You're one click away from building your ProPage. Confirm this is your email address and we'll take you straight to setup.</p>
+        <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#8EF0B8;color:#161A20;font-size:17px;font-weight:700;text-decoration:none;padding:16px 28px;border-radius:999px;">Confirm my email</a>
+        <p style="margin:24px 0 0;font-size:14px;line-height:1.5;color:#5E6762;">Didn't sign up for ProPages? You can ignore this email.</p>
+      </td></tr>
+    </table>
+    <p style="margin:16px 0 0;font-size:12px;color:#5E6762;">ProPages · propages.pro · support@propages.pro</p>
+  </td></tr>
+</table>

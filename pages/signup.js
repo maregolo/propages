@@ -108,7 +108,11 @@ export default function Signup() {
       email: email.trim().toLowerCase(),
       password,
       // Record of Terms acceptance, stored on the auth user at the moment of signup.
-      options: { data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.effective } },
+      options: {
+        data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.effective },
+        // The confirmation link lands on /welcome (must be allowed under Supabase Auth → URL Configuration).
+        emailRedirectTo: `${SITE_URL}/welcome`,
+      },
     });
 
     if (signUpError) {
@@ -131,6 +135,18 @@ export default function Signup() {
       email: email.trim().toLowerCase(),
       password,
     });
+
+    if (signInError?.code === 'email_not_confirmed') {
+      // Never clicked (or lost) the confirmation link: send a fresh one.
+      await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+        options: { emailRedirectTo: `${SITE_URL}/welcome` },
+      });
+      setLoading(false);
+      setStep('email_sent');
+      return;
+    }
 
     if (signInError) {
       setError('Incorrect password. Try again or reset your password below.');
