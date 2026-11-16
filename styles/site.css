@@ -114,15 +114,83 @@ a.site-nav__link:focus-visible { outline: 2px solid var(--site-mint); outline-of
 .site-nav--light .site-btn--light { background: var(--site-dark); color: var(--site-on-dark); }
 .site-nav--light .site-btn:focus-visible { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--site-mint-ink); }
 
-/* Not enough room to center the links between logo and buttons: drop them
-   (tablets keep Log in; phones show logo + Get started only). */
+/* ── Nav menu (hamburger) ── shown only below 1100px, see media queries below */
+.site-nav__menu-btn {
+  display: none;
+  width: 50px; height: 50px;
+  flex-shrink: 0;
+  align-items: center; justify-content: center;
+  border: 0; border-radius: var(--site-r-pill);
+  background: rgba(255,255,255,0.08);
+  color: var(--site-on-dark);
+  cursor: pointer;
+  font: inherit;
+}
+.site-nav__menu-btn:hover { background: rgba(255,255,255,0.14); }
+.site-nav__menu-btn:focus-visible { outline: 2px solid var(--site-mint); outline-offset: 2px; }
+.site-nav--light .site-nav__menu-btn { background: var(--site-tint); color: var(--site-ink); }
+.site-nav--light .site-nav__menu-btn:hover { background: #E4E9EE; }
+.site-nav--light .site-nav__menu-btn:focus-visible { outline-color: var(--site-mint-ink); }
+
+.site-nav__menu {
+  max-width: calc(var(--site-wrap) + 2 * (var(--site-gut) - var(--site-hx)));
+  margin: 8px auto 0;
+  padding: 8px;
+  border-radius: var(--site-r-panel);
+  background: var(--site-dark-2);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.32);
+  color: var(--site-on-dark);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.site-nav__menu[hidden] { display: none; }
+.site-nav__menu--light {
+  background: #FFFFFF;
+  border-color: rgba(0,0,0,0.04);
+  color: var(--site-ink);
+}
+.site-nav__menu-item {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 20px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 500;
+}
+a.site-nav__menu-item:hover { background: rgba(255,255,255,0.06); }
+.site-nav__menu--light a.site-nav__menu-item:hover { background: var(--site-tint); }
+a.site-nav__menu-item:focus-visible { outline: 2px solid var(--site-mint); outline-offset: -2px; }
+.site-nav__menu--light a.site-nav__menu-item:focus-visible { outline-color: var(--site-mint-ink); }
+.site-nav__menu-item--soon { cursor: default; }
+.site-nav__menu--light .site-nav__soon { color: var(--site-coral-ink); }
+.site-nav__menu-login { margin-top: 6px; }
+.site-nav__menu--light .site-btn--ghost-dark { background: var(--site-tint); color: var(--site-ink); }
+.site-nav__menu--light .site-btn--ghost-dark:hover { background: #E4E9EE; }
+.site-nav__menu--light .site-btn:focus-visible { box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px var(--site-mint-ink); }
+
+/* Desktop: everything fits in the bar, so the menu never shows. */
+@media (min-width: 1101px) {
+  .site-nav__menu { display: none !important; }
+}
+/* Not enough room to center the links between logo and buttons: move them
+   into the menu (tablets keep Log in in the bar). */
 @media (max-width: 1100px) {
   .site-nav__links { display: none !important; }
   .site-nav { grid-template-columns: minmax(0, 1fr) auto; }
+  .site-nav__menu-btn { display: inline-flex; }
+  .site-nav__menu-btn--phone { display: none; }  /* no links: only phones need the menu */
+  .site-nav__menu-login { display: none; }       /* Log in is still in the bar */
 }
+/* Phones: Log in moves into the menu. */
 @media (max-width: 760px) {
   .site-nav__login { display: none !important; }
   .site-nav__tile { padding: 0 18px; }
+  .site-nav__menu-btn--phone { display: inline-flex; }
+  .site-nav__menu-login { display: inline-flex; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────────── */
