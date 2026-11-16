@@ -9,6 +9,23 @@ import Icon from '../components/site/icons';
 import { SITE_URL } from '../lib/site';
 import { LEGAL } from '../lib/legal';
 
+// Turns a Supabase signUp error into something a rep can act on.
+// The raw error is also logged to the browser console for debugging.
+function signUpMessage(err) {
+  const code = err?.code || '';
+  const msg = String(err?.message || '');
+  if (code === 'over_email_send_rate_limit' || /rate limit/i.test(msg)) {
+    return "We've sent too many emails in the last hour. Please try again in a few minutes.";
+  }
+  if (/sending.*email|smtp/i.test(msg)) {
+    return "We couldn't send your confirmation email. Please try again shortly, or contact support@propages.pro.";
+  }
+  if (code === 'email_address_invalid' || /invalid.*email/i.test(msg)) return 'That email address looks invalid. Check it and try again.';
+  if (code === 'weak_password') return 'Pick a stronger password: at least 8 characters, ideally with a number or symbol.';
+  if (code === 'user_already_exists') return 'That email already has an account. Go back and sign in instead.';
+  return `Something went wrong (${msg || 'unknown error'}). Please try again.`;
+}
+
 export default function Signup() {
   const router = useRouter();
 
@@ -116,7 +133,8 @@ export default function Signup() {
     });
 
     if (signUpError) {
-      setError('Something went wrong. Please try again.');
+      console.error('signUp failed', signUpError);
+      setError(signUpMessage(signUpError));
       setLoading(false);
       return;
     }
