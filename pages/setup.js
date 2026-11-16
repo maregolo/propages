@@ -9,6 +9,8 @@ import Icon from '../components/site/icons';
 import ThemeCard from '../components/site/ThemeCard';
 import { buildDefaultBlocks } from '../lib/repBlocks';
 import { DOMAIN } from '../components/site/HandleField';
+import { RESERVED_SLUGS } from '../lib/site';
+import { US_STATES, formatLocation } from '../lib/location';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -29,6 +31,7 @@ export default function Setup() {
   const [slugAvailable,  setSlugAvailable]  = useState(null);
   const [title,          setTitle]          = useState('');
   const [city,           setCity]           = useState('');
+  const [usState,        setUsState]        = useState('');
   const [industry,       setIndustry]       = useState('');
   const [employmentType, setEmploymentType] = useState('');
   const [phone,          setPhone]          = useState('');
@@ -74,6 +77,7 @@ export default function Setup() {
   async function checkSlug(val) {
     setSlugAvailable(null);
     if (!val || val.length < 3) return;
+    if (RESERVED_SLUGS.includes(val)) { setSlugAvailable(false); return; }
     const { data } = await supabase
       .from('reps')
       .select('slug')
@@ -223,7 +227,7 @@ export default function Setup() {
       slug,
       name,
       title,
-      city,
+      city: formatLocation(city, usState),
       industry,
       employment_type: employmentType,
       phone: phone || null,
@@ -374,9 +378,20 @@ export default function Setup() {
                 </span>
               </div>
 
+              <Field label={<>Your title {opt}</>} type="text" placeholder="Solar Energy Consultant" value={title} onChange={e => setTitle(e.target.value)} />
+
               <div className="site-grid-2">
-                <Field label={<>Your title {opt}</>} type="text" placeholder="Solar Energy Consultant" value={title} onChange={e => setTitle(e.target.value)} />
-                <Field label={<>Your city {opt}</>} type="text" autoComplete="address-level2" placeholder="Phoenix, AZ" value={city} onChange={e => setCity(e.target.value)} />
+                <div>
+                  <label className="site-label" htmlFor="setup-state">State {opt}</label>
+                  <div className="site-select">
+                    <select id="setup-state" className="site-field" autoComplete="address-level1" value={usState} onChange={e => setUsState(e.target.value)}>
+                      <option value="">Select a state…</option>
+                      {US_STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
+                    </select>
+                    <Icon name="chevronDown" size={20} />
+                  </div>
+                </div>
+                <Field label={<>City or town {opt}</>} type="text" autoComplete="address-level2" placeholder="Phoenix" value={city} onChange={e => setCity(e.target.value)} />
               </div>
 
               {/* Industry */}

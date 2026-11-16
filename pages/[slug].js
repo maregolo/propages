@@ -17,6 +17,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { RESERVED_SLUGS } from '../lib/site';
 import { getTheme, themeToCSS, DEFAULT_THEME, THEMES } from '../lib/themes';
 import { SITE_URL } from '../lib/site';
 import { getDefaults } from '../lib/repDefaults';
@@ -243,8 +244,7 @@ function BlockPage({ initialRep }) {
 
 export async function getServerSideProps({ params, req, res }) {
   const slug = params.slug;
-  const reserved = ['signup', 'setup', 'api', 'dashboard', 'reset', 'certified'];
-  if (reserved.includes(slug)) {
+  if (RESERVED_SLUGS.includes(slug)) {
     return { redirect: { destination: `/${slug}`, permanent: false } };
   }
 

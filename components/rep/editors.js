@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { US_STATES, formatLocation, parseLocation } from '../../lib/location';
 import RepIcon, { LINK_ICON_CHOICES, linkIconName } from './RepIcon';
 import { formConfig } from './blocks';
 import { cleanLinks, cleanStats, cleanTestimonials, normalizeUrl } from '../../lib/repBlocks';
@@ -44,7 +45,8 @@ export function HeroEditor({ block, rep, defaults, onSave, onCancel, onRepPatch 
   const d = block.data || {};
   const [name, setName] = useState(rep.name || '');
   const [title, setTitle] = useState(rep.title || '');
-  const [city, setCity] = useState(rep.city || '');
+  const [city, setCity] = useState(() => parseLocation(rep.city).city);
+  const [usState, setUsState] = useState(() => parseLocation(rep.city).state);
   const [photo, setPhoto] = useState(null);
   const [headline, setHeadline] = useState(d.headline || '');
   const [highlight, setHighlight] = useState(d.highlight || '');
@@ -72,7 +74,7 @@ export function HeroEditor({ block, rep, defaults, onSave, onCancel, onRepPatch 
     if (half) { setError('Each proof number needs both a number and a label.'); return; }
 
     setSaving(true);
-    const patch = { name: trim(name), title: trim(title), city: trim(city) };
+    const patch = { name: trim(name), title: trim(title), city: formatLocation(city, usState) };
     if (photo) {
       const ext = (photo.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
       const path = `${rep.slug}-${Date.now()}.${ext}`;
@@ -101,7 +103,13 @@ export function HeroEditor({ block, rep, defaults, onSave, onCancel, onRepPatch 
         <span className="ow-group-title">You</span>
         <Field label="Name"><input className="ow-input" value={name} onChange={e => setName(e.target.value)} autoComplete="name" /></Field>
         <Field label="Title"><input className="ow-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Roofing Specialist" /></Field>
-        <Field label="City"><input className="ow-input" value={city} onChange={e => setCity(e.target.value)} placeholder="Worcester, MA" /></Field>
+        <Field label="State">
+          <select className="ow-input" value={usState} onChange={e => setUsState(e.target.value)} autoComplete="address-level1">
+            <option value="">No state</option>
+            {US_STATES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
+          </select>
+        </Field>
+        <Field label="City or town"><input className="ow-input" value={city} onChange={e => setCity(e.target.value)} placeholder="Worcester" autoComplete="address-level2" /></Field>
         <Field label="Photo" optional hint={photo ? photo.name : (rep.photo_url ? 'Pick a file to replace your current photo.' : 'Without one, your initials show instead.')}>
           <input className="ow-input" type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] || null)} style={{ paddingTop: 12 }} />
         </Field>
