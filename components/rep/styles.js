@@ -209,6 +209,16 @@ export const REP_STYLES = `
   .ow-addrow { min-height: 46px; border-radius: 12px; border: 1.5px dashed rgba(238,241,244,0.3); background: transparent; color: var(--site-on-dark);
     font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
   .ow-addrow:hover { border-color: var(--site-mint); color: var(--site-mint); }
+  .ow-upload { position: relative; min-height: 64px; }
+  .ow-upload:focus-within { border-color: var(--site-mint); color: var(--site-mint); box-shadow: 0 0 0 3px rgba(142,240,184,0.35); }
+  .ow-upload.is-busy { cursor: progress; opacity: 0.8; }
+  .ow-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .ow-upload.is-busy .ow-upload-input { cursor: progress; }
+  .ow-photo { flex-direction: row; align-items: flex-start; gap: 12px; }
+  .ow-photo-thumb { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 10px; object-fit: cover; background: rgba(255,255,255,0.06); }
+  .ow-photo-thumb--empty { display: grid; place-items: center; color: var(--site-on-dark-2); }
+  .ow-photo-fields { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .ow-photo-tools { display: inline-flex; gap: 2px; }
   .ow-check { display: flex; align-items: center; gap: 10px; font-size: 15px; cursor: pointer; }
   .ow-check input { width: 18px; height: 18px; accent-color: var(--site-mint); }
   .ow-error { margin: 0; font-size: 14px; font-weight: 600; color: #FF9C9C; }

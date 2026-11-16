@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
+import { uploadImage, ImageError } from '../lib/imageUpload';
 import { THEMES, getTheme, DEFAULT_THEME } from '../lib/themes';
 import AppShell, { AppLoading, Intro, Alert } from '../components/site/AppShell';
 import Button from '../components/site/Button';
@@ -197,20 +198,13 @@ export default function Setup() {
     // Upload photo if provided
     let photo_url = null;
     if (photo) {
-      const ext = photo.name.split('.').pop();
-      const path = `${slug}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(path, photo);
-      if (uploadError) {
-        setError('Photo upload failed. You can skip it for now.');
+      try {
+        photo_url = await uploadImage(photo, { slug, kind: 'avatar' });
+      } catch (err) {
+        setError(err instanceof ImageError ? `${err.message} You can also skip the photo for now.` : 'Photo upload failed. You can skip it for now.');
         setSaving(false);
         return;
       }
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(path);
-      photo_url = urlData.publicUrl;
     }
 
     // Build the default block stack for this rep
